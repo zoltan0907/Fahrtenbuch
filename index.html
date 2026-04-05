@@ -1,130 +1,455 @@
 <!DOCTYPE html>
 <html lang="de">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lokales Fahrtenbuch Pro</title>
-    
+
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; color: #333; }
-        h1 { text-align: center; color: #2c3e50; }
-        .container { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr 320px; gap: 20px; }
-        
-        .sidebar { display: flex; flex-direction: column; gap: 20px; position: sticky; top: 20px; }
-        .box { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .box h3 { margin-top: 0; border-bottom: 2px solid #3498db; padding-bottom: 10px; font-size: 18px; }
-        .info-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 15px; }
-        .info-row strong { color: #2980b9; }
-        
-        .form-group { display: flex; flex-direction: column; margin-bottom: 12px;}
-        label { margin-bottom: 5px; font-size: 13px; font-weight: bold; color: #555; }
-        input, select, textarea { padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; width: 100%; box-sizing: border-box; }
-        textarea { resize: vertical; min-height: 40px; }
-        
-        .input-with-btn { display: flex; gap: 5px; }
-        .btn-icon { width: auto; padding: 10px 15px; background-color: #34495e; color: white; border: none; border-radius: 4px; cursor: pointer;}
-        
-        .main-content { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
-        .full-width { grid-column: span 2; }
-        
-        button { background-color: #27ae60; color: white; border: none; padding: 12px; border-radius: 4px; font-size: 15px; cursor: pointer; transition: background 0.3s; font-weight: bold; }
-        button:hover { background-color: #2ecc71; }
-        .btn-submit { grid-column: span 2; margin-top: 10px;}
-        .btn-calc { background-color: #f39c12; grid-column: span 2; }
-        .btn-calc:hover { background-color: #f1c40f; }
-        .btn-calc:disabled { background-color: #bdc3c7; cursor: not-allowed; }
-        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 20px;
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            position: sticky;
+            top: 20px;
+        }
+
+        .box {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .box h3 {
+            margin-top: 0;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+            font-size: 18px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            font-size: 15px;
+        }
+
+        .info-row strong {
+            color: #2980b9;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 12px;
+        }
+
+        label {
+            margin-bottom: 5px;
+            font-size: 13px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        input,
+        select,
+        textarea {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 40px;
+        }
+
+        .input-with-btn {
+            display: flex;
+            gap: 5px;
+        }
+
+        .btn-icon {
+            width: auto;
+            padding: 10px 15px;
+            background-color: #34495e;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .main-content {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .full-width {
+            grid-column: span 2;
+        }
+
+        button {
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 4px;
+            font-size: 15px;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background-color: #2ecc71;
+        }
+
+        .btn-submit {
+            grid-column: span 2;
+            margin-top: 10px;
+        }
+
+        .btn-calc {
+            background-color: #f39c12;
+            grid-column: span 2;
+        }
+
+        .btn-calc:hover {
+            background-color: #f1c40f;
+        }
+
+        .btn-calc:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+
         /* Sidebar Buttons */
-        .btn-share { background-color: #3498db; width: 100%; margin-top: 15px; }
-        .btn-share:hover { background-color: #2980b9; }
-        .btn-export { background-color: #8e44ad; width: 100%; margin-bottom: 10px; }
-        .btn-import { background-color: #2c3e50; width: 100%; }
-        .file-input-wrapper { position: relative; overflow: hidden; display: inline-block; width: 100%; }
-        .file-input-wrapper input[type=file] { font-size: 100px; position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; height: 100%; }
-        
+        .btn-share {
+            background-color: #3498db;
+            width: 100%;
+            margin-top: 15px;
+        }
+
+        .btn-share:hover {
+            background-color: #2980b9;
+        }
+
+        .btn-export {
+            background-color: #8e44ad;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .btn-import {
+            background-color: #2c3e50;
+            width: 100%;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-input-wrapper input[type=file] {
+            font-size: 100px;
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            cursor: pointer;
+            height: 100%;
+        }
+
         /* Standard Tabelle (Desktop) */
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 13px; table-layout: fixed; }
-        th, td { padding: 10px 8px; text-align: left; border-bottom: 1px solid #ddd; vertical-align: top; word-wrap: break-word; }
-        th { background-color: #f8f9fa; color: #2c3e50; }
-        
-        .col-filter { width: 100%; padding: 5px; font-size: 11px; margin-top: 5px; border: 1px solid #bdc3c7; border-radius: 3px; font-weight: normal; box-sizing: border-box; }
-        .action-btns { display: flex; gap: 5px; flex-wrap: wrap; width: 100%; }
-        .delete-btn { background-color: #e74c3c; padding: 6px 10px; font-size: 11px; margin: 0; }
-        .copy-btn { background-color: #3498db; padding: 6px 10px; font-size: 11px; margin: 0; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 13px;
+            table-layout: fixed;
+        }
 
-        .hidden { display: none !important; }
-        .loading { font-size: 12px; color: #e67e22; margin-top: 5px; font-weight: bold; }
+        th,
+        td {
+            padding: 10px 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+            vertical-align: top;
+            word-wrap: break-word;
+        }
 
-        .map-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center; }
-        .map-container { background: white; width: 95%; max-width: 600px; height: 70vh; border-radius: 8px; display: flex; flex-direction: column; overflow: hidden; }
-        #mapView { flex-grow: 1; width: 100%; cursor: crosshair; }
+        th {
+            background-color: #f8f9fa;
+            color: #2c3e50;
+        }
+
+        .col-filter {
+            width: 100%;
+            padding: 5px;
+            font-size: 11px;
+            margin-top: 5px;
+            border: 1px solid #bdc3c7;
+            border-radius: 3px;
+            font-weight: normal;
+            box-sizing: border-box;
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+            width: 100%;
+        }
+
+        .delete-btn {
+            background-color: #e74c3c;
+            padding: 6px 10px;
+            font-size: 11px;
+            margin: 0;
+        }
+
+        .copy-btn {
+            background-color: #3498db;
+            padding: 6px 10px;
+            font-size: 11px;
+            margin: 0;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .loading {
+            font-size: 12px;
+            color: #e67e22;
+            margin-top: 5px;
+            font-weight: bold;
+        }
+
+        .map-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .map-container {
+            background: white;
+            width: 95%;
+            max-width: 600px;
+            height: 70vh;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        #mapView {
+            flex-grow: 1;
+            width: 100%;
+            cursor: crosshair;
+        }
 
         /* ========================================================
            SMARTPHONE OPTIMIERUNG (CARD LAYOUT)
-           ======================================================== */
+        ======================================================== */
         @media (max-width: 768px) {
-            body { padding: 10px; }
-            .container { grid-template-columns: 1fr; }
-            .form-grid { grid-template-columns: 1fr; }
-            .full-width { grid-column: span 1; }
-            
-            /* Zerstöre die klassische Tabellenstruktur */
-            table, thead, tbody, th, td, tr { display: block; }
-            
-            /* 1. Mache aus den Tabellenköpfen ein schönes Filter-Menü */
-            thead { background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #ddd; margin-bottom: 20px; }
-            thead tr { border: none; padding: 0; }
-            th { border: none; padding: 5px 0; }
-            th br { display: none; } /* Verstecke die Zeilenumbrüche */
-            
-            /* Verstecke Header ohne Filter (km, Kosten, Aktionen) */
-            th:nth-child(5), th:nth-child(6), th:nth-child(7) { display: none; }
-            
-            /* 2. Mache aus jeder Tabellenzeile eine schöne Karte */
-            #tabelleBody tr { 
-                margin-bottom: 20px; 
-                border: 1px solid #dcdde1; 
-                border-radius: 8px; 
-                padding: 10px 15px; 
-                background: #fff; 
-                box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            body {
+                padding: 10px;
             }
-            
+
+            .container {
+                grid-template-columns: 1fr;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .full-width {
+                grid-column: span 1;
+            }
+
+            /* Zerstöre die klassische Tabellenstruktur */
+            table,
+            thead,
+            tbody,
+            th,
+            td,
+            tr {
+                display: block;
+            }
+
+            /* 1. Mache aus den Tabellenköpfen ein schönes Filter-Menü */
+            thead {
+                background: #f8f9fa;
+                padding: 15px;
+                border-radius: 8px;
+                border: 1px solid #ddd;
+                margin-bottom: 20px;
+            }
+
+            thead tr {
+                border: none;
+                padding: 0;
+            }
+
+            th {
+                border: none;
+                padding: 5px 0;
+            }
+
+            th br {
+                display: none;
+            }
+
+            /* Verstecke die Zeilenumbrüche */
+
+            /* Verstecke Header ohne Filter (km, Kosten, Aktionen) */
+            th:nth-child(5),
+            th:nth-child(6),
+            th:nth-child(7) {
+                display: none;
+            }
+
+            /* 2. Mache aus jeder Tabellenzeile eine schöne Karte */
+            #tabelleBody tr {
+                margin-bottom: 20px;
+                border: 1px solid #dcdde1;
+                border-radius: 8px;
+                padding: 10px 15px;
+                background: #fff;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            }
+
             /* 3. Mache aus den Zellen beschriftete Reihen */
-            td { 
-                display: flex; 
-                justify-content: space-between; 
+            td {
+                display: flex;
+                justify-content: space-between;
                 align-items: flex-start;
-                text-align: right; 
-                border-bottom: 1px solid #f1f2f6; 
-                padding: 8px 0; 
+                text-align: right;
+                border-bottom: 1px solid #f1f2f6;
+                padding: 8px 0;
                 font-size: 14px;
             }
-            td:last-child { border-bottom: none; padding-bottom: 0; }
-            
-            /* Das unsichtbare Schild (data-label) einfügen */
-            td::before { 
-                content: attr(data-label); 
-                font-weight: bold; 
-                color: #2c3e50; 
-                text-align: left; 
-                margin-right: 15px; 
-                flex-shrink: 0; 
+
+            td:last-child {
+                border-bottom: none;
+                padding-bottom: 0;
             }
-            
+
+            /* Das unsichtbare Schild (data-label) einfügen */
+            td::before {
+                content: attr(data-label);
+                font-weight: bold;
+                color: #2c3e50;
+                text-align: left;
+                margin-right: 15px;
+                flex-shrink: 0;
+            }
+
             /* Notizen sollen ggf. in eine neue Zeile umbrechen */
-            td[data-label="Notizen"] { flex-direction: column; text-align: left; align-items: flex-start; }
-            td[data-label="Notizen"]::before { margin-bottom: 5px; }
+            td[data-label="Notizen"] {
+                flex-direction: column;
+                text-align: left;
+                align-items: flex-start;
+            }
+
+            td[data-label="Notizen"]::before {
+                margin-bottom: 5px;
+            }
 
             /* Aktionen-Buttons ordentlich anordnen */
-            .action-btns { justify-content: flex-end; gap: 10px; margin-top: 5px; }
+            .action-btns {
+                justify-content: flex-end;
+                gap: 10px;
+                margin-top: 5px;
+            }
+        }
+
+        /* ========================================================
+            SMARTPHONE-OPTIMIERUNG FÜR FORMULARFELDER
+        ======================================================== */
+        @media (max-width: 768px) {
+
+            /* Wähle die Container für Start-, Zieladresse und Notizen aus */
+            #fahrtForm .form-group {
+                display: block;
+                /* Ordne die form-groups untereinander an */
+                width: 100%;
+                /* Nimm die volle Breite ein */
+                margin-bottom: 15px;
+                /* Füge etwas Abstand zwischen den Feldern hinzu */
+            }
+
+            /* Wähle die Eingabefelder und die Textarea innerhalb der form-groups aus */
+            #fahrtForm input,
+            #fahrtForm textarea {
+                display: block;
+                /* Nimm die volle Breite ein */
+                width: 100%;
+                /* Setze die Breite auf 100% */
+                box-sizing: border-box;
+                /* Stelle sicher, dass Padding und Border die Breite nicht vergrößern */
+            }
+
+            /* Passe das Notizen-Textarea-Feld spezifisch an */
+            #notizen {
+                resize: vertical;
+                /* Erlaube nur vertikales Ändern der Größe */
+                min-height: 100px;
+                /* Setze eine Mindesthöhe für bessere Lesbarkeit */
+            }
         }
     </style>
 </head>
+
 <body>
 
     <h1>🚗 Mein lokales Fahrtenbuch</h1>
@@ -142,19 +467,21 @@
                         <label for="distanz">Distanz (km)</label>
                         <input type="number" step="0.1" id="distanz" placeholder="z.B. 25.5" required>
                     </div>
-                    
+
                     <div class="form-group">
                         <label for="start">Startadresse</label>
                         <div class="input-with-btn">
-                            <input type="text" id="start" placeholder="Tippen oder 📍" required ondblclick="openMapPicker('start')">
+                            <input type="text" id="start" placeholder="Tippen oder 📍" required
+                                ondblclick="openMapPicker('start')">
                             <button type="button" class="btn-icon" onclick="openMapPicker('start')">📍</button>
                         </div>
                     </div>
-                    
+
                     <div class="form-group">
                         <label for="ziel">Zieladresse</label>
                         <div class="input-with-btn">
-                            <input type="text" id="ziel" placeholder="Tippen oder 📍" required ondblclick="openMapPicker('ziel')">
+                            <input type="text" id="ziel" placeholder="Tippen oder 📍" required
+                                ondblclick="openMapPicker('ziel')">
                             <button type="button" class="btn-icon" onclick="openMapPicker('ziel')">📍</button>
                         </div>
                     </div>
@@ -163,10 +490,11 @@
                         <label for="notizen">Notizen</label>
                         <textarea id="notizen" placeholder="Zweck der Fahrt, Tanken, etc."></textarea>
                     </div>
-                    
-                    <button type="button" class="btn-calc" id="btnBerechnen" onclick="berechneRoute()">📍 Distanz automatisch berechnen</button>
+
+                    <button type="button" class="btn-calc" id="btnBerechnen" onclick="berechneRoute()">📍 Distanz
+                        automatisch berechnen</button>
                     <div id="calcStatus" class="loading hidden">Berechne Route...</div>
-                    
+
                     <button type="submit" class="btn-submit">💾 Fahrt speichern</button>
                 </div>
             </form>
@@ -174,10 +502,14 @@
             <table id="fahrtenTabelle">
                 <thead>
                     <tr>
-                        <th style="width: 85px;">Datum<br><input type="text" id="colFilterDatum" class="col-filter" placeholder="Filter..." onkeyup="aktualisiereAnsicht()"></th>
-                        <th>Start<br><input type="text" id="colFilterStart" class="col-filter" placeholder="Filter..." onkeyup="aktualisiereAnsicht()"></th>
-                        <th>Ziel<br><input type="text" id="colFilterZiel" class="col-filter" placeholder="Filter..." onkeyup="aktualisiereAnsicht()"></th>
-                        <th>Notizen<br><input type="text" id="colFilterNotizen" class="col-filter" placeholder="Filter..." onkeyup="aktualisiereAnsicht()"></th>
+                        <th style="width: 85px;">Datum<br><input type="text" id="colFilterDatum" class="col-filter"
+                                placeholder="Filter..." onkeyup="aktualisiereAnsicht()"></th>
+                        <th>Start<br><input type="text" id="colFilterStart" class="col-filter" placeholder="Filter..."
+                                onkeyup="aktualisiereAnsicht()"></th>
+                        <th>Ziel<br><input type="text" id="colFilterZiel" class="col-filter" placeholder="Filter..."
+                                onkeyup="aktualisiereAnsicht()"></th>
+                        <th>Notizen<br><input type="text" id="colFilterNotizen" class="col-filter"
+                                placeholder="Filter..." onkeyup="aktualisiereAnsicht()"></th>
                         <th style="width: 60px;">km</th>
                         <th style="width: 65px;">Kosten</th>
                         <th style="width: 140px;">Aktionen</th>
@@ -221,7 +553,8 @@
                     <label>€ / km:</label>
                     <input type="number" step="0.01" id="kmPreis" value="0.30" onchange="aktualisiereAnsicht()">
                 </div>
-                <button type="button" class="btn-share" onclick="teileFahrtenPerMail()">✉️ Liste per E-Mail teilen</button>
+                <button type="button" class="btn-share" onclick="teileFahrtenPerMail()">✉️ Liste per E-Mail
+                    teilen</button>
             </div>
 
             <div class="box">
@@ -242,7 +575,8 @@
     <div id="mapModal" class="map-modal">
         <div class="map-container">
             <div id="mapView"></div>
-            <button type="button" onclick="closeMapPicker()" style="background:#e74c3c; padding: 15px; font-weight: bold;">Zurück / Abbrechen</button>
+            <button type="button" onclick="closeMapPicker()"
+                style="background:#e74c3c; padding: 15px; font-weight: bold;">Zurück / Abbrechen</button>
         </div>
     </div>
 
@@ -253,10 +587,10 @@
         let aktuellGefilterteFahrten = [];
 
         // --- HELPERS ---
-        function formatLocalDatum(d) { return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
-        function getLetztesDatum() { if(!fahrten.length) return formatLocalDatum(new Date()); return formatLocalDatum(new Date(Math.max(...fahrten.map(f=>new Date(f.datum))))); }
+        function formatLocalDatum(d) { return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; }
+        function getLetztesDatum() { if (!fahrten.length) return formatLocalDatum(new Date()); return formatLocalDatum(new Date(Math.max(...fahrten.map(f => new Date(f.datum))))); }
         function getErsterTagDesMonats() { const d = new Date(); return formatLocalDatum(new Date(d.getFullYear(), d.getMonth(), 1)); }
-        function getLetzterTagDesMonats() { const d = new Date(); return formatLocalDatum(new Date(d.getFullYear(), d.getMonth()+1, 0)); }
+        function getLetzterTagDesMonats() { const d = new Date(); return formatLocalDatum(new Date(d.getFullYear(), d.getMonth() + 1, 0)); }
 
         // --- MAP PICKER (Jetzt mit CARTO Tiles wg. Referer Blockade) ---
         let pickerMap = null, pickerMarker = null, currentTargetField = '';
@@ -264,9 +598,9 @@
             currentTargetField = fieldId;
             document.getElementById('mapModal').style.display = 'flex';
             if (!pickerMap) {
-                pickerMap = L.map('mapView').setView([51.1, 10.4], 6); 
-                L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { 
-                    attribution: '&copy; OpenStreetMap &copy; CARTO', subdomains: 'abcd', maxZoom: 19 
+                pickerMap = L.map('mapView').setView([51.1, 10.4], 6);
+                L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+                    attribution: '&copy; OpenStreetMap &copy; CARTO', subdomains: 'abcd', maxZoom: 19
                 }).addTo(pickerMap);
                 pickerMap.on('click', async (e) => {
                     const { lat, lng } = e.latlng;
@@ -274,13 +608,13 @@
                     pickerMarker = L.marker([lat, lng]).addTo(pickerMap);
                     const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
                     const data = await res.json();
-                    if(data && data.display_name) {
+                    if (data && data.display_name) {
                         document.getElementById(currentTargetField).value = data.display_name;
                         closeMapPicker();
                     }
                 });
             }
-            setTimeout(() => { pickerMap.invalidateSize(); pickerMap.locate({setView: true, maxZoom: 14}); }, 100);
+            setTimeout(() => { pickerMap.invalidateSize(); pickerMap.locate({ setView: true, maxZoom: 14 }); }, 100);
         }
         function closeMapPicker() { document.getElementById('mapModal').style.display = 'none'; }
 
@@ -288,9 +622,9 @@
         window.onload = () => {
             const d = localStorage.getItem(STORAGE_KEY); if (d) fahrten = JSON.parse(d);
             const s = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}');
-            if(s.apiAuswahl) document.getElementById('apiAuswahl').value = s.apiAuswahl;
-            if(s.apiKey) document.getElementById('apiKey').value = s.apiKey;
-            if(s.kmPreis) document.getElementById('kmPreis').value = s.kmPreis;
+            if (s.apiAuswahl) document.getElementById('apiAuswahl').value = s.apiAuswahl;
+            if (s.apiKey) document.getElementById('apiKey').value = s.apiKey;
+            if (s.kmPreis) document.getElementById('kmPreis').value = s.kmPreis;
             document.getElementById('filterVon').value = getErsterTagDesMonats();
             document.getElementById('filterBis').value = getLetzterTagDesMonats();
             aktualisiereAnsicht();
@@ -317,8 +651,8 @@
                     d = r.routes[0].distance / 1000;
                 } else if (m === 'google') {
                     const key = document.getElementById('apiKey').value;
-                    if(!window.google) await new Promise(res => { const sc = document.createElement('script'); sc.src = `https://maps.googleapis.com/maps/api/js?key=${key}`; sc.onload = res; document.head.appendChild(sc); });
-                    const res = await new Promise((res, rej) => new google.maps.DistanceMatrixService().getDistanceMatrix({origins:[s],destinations:[z],travelMode:'DRIVING'}, (r,st) => st=='OK'?res(r):rej(st)));
+                    if (!window.google) await new Promise(res => { const sc = document.createElement('script'); sc.src = `https://maps.googleapis.com/maps/api/js?key=${key}`; sc.onload = res; document.head.appendChild(sc); });
+                    const res = await new Promise((res, rej) => new google.maps.DistanceMatrixService().getDistanceMatrix({ origins: [s], destinations: [z], travelMode: 'DRIVING' }, (r, st) => st == 'OK' ? res(r) : rej(st)));
                     d = res.rows[0].elements[0].distance.value / 1000;
                 }
                 document.getElementById('distanz').value = d.toFixed(1);
@@ -333,7 +667,7 @@
             aktuellGefilterteFahrten = fahrten.filter(x => {
                 const deD = new Date(x.datum).toLocaleDateString('de-DE');
                 return (!v || x.datum >= v) && (!b || x.datum <= b) && (!fD || deD.includes(fD)) && (!fS || x.start.toLowerCase().includes(fS)) && (!fZ || x.ziel.toLowerCase().includes(fZ)) && (!fN || (x.notizen || "").toLowerCase().includes(fN));
-            }).sort((x,y) => new Date(y.datum) - new Date(x.datum));
+            }).sort((x, y) => new Date(y.datum) - new Date(x.datum));
 
             const tb = document.getElementById('tabelleBody'); tb.innerHTML = '';
             let sD = 0, sK = 0;
@@ -346,8 +680,8 @@
                     <td data-label="Start:">${x.start}</td>
                     <td data-label="Ziel:">${x.ziel}</td>
                     <td data-label="Notizen:">${x.notizen || '-'}</td>
-                    <td data-label="Distanz:">${x.distanz.toFixed(1).replace('.',',')} km</td>
-                    <td data-label="Kosten:">${k.toFixed(2).replace('.',',')} €</td>
+                    <td data-label="Distanz:">${x.distanz.toFixed(1).replace('.', ',')} km</td>
+                    <td data-label="Kosten:">${k.toFixed(2).replace('.', ',')} €</td>
                     <td data-label="" class="action-btns">
                         <button class="copy-btn" onclick="dupliziereFahrt(${x.id})">Kopie</button>
                         <button class="delete-btn" onclick="loescheFahrt(${x.id})">Löschen</button>
@@ -355,8 +689,8 @@
                 tb.appendChild(tr); sD += x.distanz; sK += k;
             });
             document.getElementById('infoAnzahl').innerText = aktuellGefilterteFahrten.length;
-            document.getElementById('infoDistanz').innerText = sD.toFixed(1).replace('.',',') + ' km';
-            document.getElementById('infoKosten').innerText = sK.toFixed(2).replace('.',',') + ' €';
+            document.getElementById('infoDistanz').innerText = sD.toFixed(1).replace('.', ',') + ' km';
+            document.getElementById('infoKosten').innerText = sK.toFixed(2).replace('.', ',') + ' €';
             document.getElementById('datum').value = getLetztesDatum();
         }
 
@@ -380,7 +714,7 @@
         function dupliziereFahrt(id) {
             const f = fahrten.find(x => x.id === id);
             if (f) {
-                ['start','ziel','distanz','notizen'].forEach(k => document.getElementById(k).value = f[k] || '');
+                ['start', 'ziel', 'distanz', 'notizen'].forEach(k => document.getElementById(k).value = f[k] || '');
                 document.getElementById('datum').value = getLetztesDatum();
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }
@@ -388,13 +722,13 @@
 
         document.getElementById('fahrtForm').onsubmit = (e) => {
             e.preventDefault();
-            fahrten.push({ id: Date.now(), datum: document.getElementById('datum').value, start: document.getElementById('start').value, ziel: document.getElementById('ziel').value, distanz: parseFloat(document.getElementById('distanz').value.replace(',','.')), notizen: document.getElementById('notizen').value });
+            fahrten.push({ id: Date.now(), datum: document.getElementById('datum').value, start: document.getElementById('start').value, ziel: document.getElementById('ziel').value, distanz: parseFloat(document.getElementById('distanz').value.replace(',', '.')), notizen: document.getElementById('notizen').value });
             speichereDaten();
-            ['distanz','start','ziel','notizen'].forEach(k => document.getElementById(k).value = '');
+            ['distanz', 'start', 'ziel', 'notizen'].forEach(k => document.getElementById(k).value = '');
             aktualisiereAnsicht();
         };
 
-        function loescheFahrt(id) { if(confirm("Löschen?")) { fahrten = fahrten.filter(x => x.id !== id); speichereDaten(); aktualisiereAnsicht(); } }
+        function loescheFahrt(id) { if (confirm("Löschen?")) { fahrten = fahrten.filter(x => x.id !== id); speichereDaten(); aktualisiereAnsicht(); } }
         ['filterVon', 'filterBis'].forEach(id => document.getElementById(id).onchange = aktualisiereAnsicht);
 
         // --- CRYPTO ---
@@ -406,7 +740,7 @@
         }
 
         async function exportDaten() {
-            const p = document.getElementById('backupPasswort').value; if(!p) return alert("Passwort!");
+            const p = document.getElementById('backupPasswort').value; if (!p) return alert("Passwort!");
             const s = crypto.getRandomValues(new Uint8Array(16)), i = crypto.getRandomValues(new Uint8Array(12)), k = await getKey(p, s);
             const e = await crypto.subtle.encrypt({ name: "AES-GCM", iv: i }, k, new TextEncoder().encode(JSON.stringify(fahrten)));
             const b = new Blob([JSON.stringify({ salt: bufferToBase64(s), iv: bufferToBase64(i), data: bufferToBase64(e) })], { type: "application/json" });
@@ -414,7 +748,7 @@
         }
 
         async function importDaten(ev) {
-            const p = document.getElementById('backupPasswort').value, f = ev.target.files[0]; if(!f || !p) return alert("Passwort/Datei!");
+            const p = document.getElementById('backupPasswort').value, f = ev.target.files[0]; if (!f || !p) return alert("Passwort/Datei!");
             const reader = new FileReader();
             reader.onload = async (e) => {
                 try {
@@ -423,7 +757,7 @@
                     const list = JSON.parse(new TextDecoder().decode(dec));
                     let count = 0;
                     list.forEach(item => {
-                        const exists = fahrten.some(x => x.datum === item.datum && x.start === item.start && x.ziel === item.ziel && (x.notizen||"") === (item.notizen||""));
+                        const exists = fahrten.some(x => x.datum === item.datum && x.start === item.start && x.ziel === item.ziel && (x.notizen || "") === (item.notizen || ""));
                         if (!exists) { fahrten.push(item); count++; }
                     });
                     speichereDaten(); aktualisiereAnsicht(); alert(count + " neue Fahrten.");
@@ -433,4 +767,5 @@
         }
     </script>
 </body>
+
 </html>
