@@ -96,6 +96,12 @@
         .input-with-btn {
             display: flex;
             gap: 5px;
+            width: 100%;
+        }
+
+        .input-with-btn input {
+            flex-grow: 1;
+            width: 100%;
         }
 
         .btn-icon {
@@ -152,24 +158,10 @@
             grid-column: span 2;
         }
 
-        .btn-calc:hover {
-            background-color: #f1c40f;
-        }
-
-        .btn-calc:disabled {
-            background-color: #bdc3c7;
-            cursor: not-allowed;
-        }
-
-        /* Sidebar Buttons */
         .btn-share {
             background-color: #3498db;
             width: 100%;
             margin-top: 15px;
-        }
-
-        .btn-share:hover {
-            background-color: #2980b9;
         }
 
         .btn-export {
@@ -200,7 +192,6 @@
             height: 100%;
         }
 
-        /* Standard Tabelle (Desktop) */
         table {
             width: 100%;
             border-collapse: collapse;
@@ -230,7 +221,6 @@
             margin-top: 5px;
             border: 1px solid #bdc3c7;
             border-radius: 3px;
-            font-weight: normal;
             box-sizing: border-box;
         }
 
@@ -297,116 +287,219 @@
         }
 
         /* ========================================================
-           SMARTPHONE OPTIMIERUNG (CARD LAYOUT & FORMULAR)
+           LOGIN OVERLAY (Sperrbildschirm)
+           ======================================================== */
+        #loginOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #2c3e50;
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .login-box {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+
+        .login-box h2 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+
+        .login-box input {
+            width: 100%;
+            margin-bottom: 15px;
+            font-size: 16px;
+            padding: 12px;
+            box-sizing: border-box;
+            text-align: center;
+        }
+
+        .login-box button {
+            width: 100%;
+            font-size: 16px;
+            padding: 12px;
+        }
+
+        /* ========================================================
+           SMARTPHONE OPTIMIERUNG
            ======================================================== */
         @media (max-width: 768px) {
-            body { padding: 10px; }
-            .container { display: flex; flex-direction: column; }
-            
-            /* 1. GRID KOMPLETT ABSCHALTEN - Formular wird zur vertikalen Liste */
-            .form-grid { 
-                display: flex !important; 
-                flex-direction: column !important; 
-                gap: 15px;
-            }
-            
-            .form-group { width: 100%; margin: 0; }
-            
-            /* 2. Sichern, dass das Eingabefeld den 📍-Button an den Rand drückt */
-            .input-with-btn { 
-                display: flex; 
-                width: 100%; 
-            }
-            .input-with-btn input { 
-                flex-grow: 1; /* Nimmt den gesamten restlichen Platz ein */
-                width: 100%; 
+            body {
+                padding: 10px;
             }
 
-            /* Buttons auf volle Breite zwingen */
-            .btn-submit, .btn-calc { 
-                width: 100%; 
+            .container {
+                display: flex;
+                flex-direction: column;
+            }
+
+            .form-grid {
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 15px;
+            }
+
+            .form-group {
+                width: 100%;
+                margin: 0;
+            }
+
+            .btn-submit,
+            .btn-calc {
+                width: 100%;
                 margin-top: 5px;
             }
-            
-            /* Zerstöre die klassische Tabellenstruktur */
-            table, thead, tbody, th, td, tr { display: block; }
-            
-            /* Mache aus den Tabellenköpfen ein schönes Filter-Menü */
-            thead { background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #ddd; margin-bottom: 20px; }
-            thead tr { border: none; padding: 0; }
-            th { border: none; padding: 5px 0; }
-            th br { display: none; } 
-            th:nth-child(5), th:nth-child(6), th:nth-child(7) { display: none; }
-            
-            /* Mache aus jeder Tabellenzeile eine Karte */
-            #tabelleBody tr { 
-                margin-bottom: 20px; border: 1px solid #dcdde1; border-radius: 8px; 
-                padding: 10px 15px; background: #fff; box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+
+            table,
+            thead,
+            tbody,
+            th,
+            td,
+            tr {
+                display: block;
             }
-            
-            /* Mache aus den Zellen beschriftete Reihen */
-            td { 
-                display: flex; justify-content: space-between; align-items: flex-start;
-                text-align: right; border-bottom: 1px solid #f1f2f6; padding: 8px 0; font-size: 14px;
+
+            thead {
+                background: #f8f9fa;
+                padding: 15px;
+                border-radius: 8px;
+                border: 1px solid #ddd;
+                margin-bottom: 20px;
             }
-            td:last-child { border-bottom: none; padding-bottom: 0; }
-            
-            td::before { 
-                content: attr(data-label); font-weight: bold; color: #2c3e50; 
-                text-align: left; margin-right: 15px; flex-shrink: 0; 
+
+            thead tr {
+                border: none;
+                padding: 0;
             }
-            
-            td[data-label="Notizen:"] { flex-direction: column; text-align: left; align-items: flex-start; }
-            td[data-label="Notizen:"]::before { margin-bottom: 5px; }
-            .action-btns { justify-content: flex-end; gap: 10px; margin-top: 5px; }
-        }    </style>
+
+            th {
+                border: none;
+                padding: 5px 0;
+            }
+
+            th br {
+                display: none;
+            }
+
+            th:nth-child(5),
+            th:nth-child(6),
+            th:nth-child(7) {
+                display: none;
+            }
+
+            #tabelleBody tr {
+                margin-bottom: 20px;
+                border: 1px solid #dcdde1;
+                border-radius: 8px;
+                padding: 10px 15px;
+                background: #fff;
+            }
+
+            td {
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+                text-align: right;
+                border-bottom: 1px solid #f1f2f6;
+                padding: 8px 0;
+                font-size: 14px;
+            }
+
+            td:last-child {
+                border-bottom: none;
+                padding-bottom: 0;
+            }
+
+            td::before {
+                content: attr(data-label);
+                font-weight: bold;
+                color: #2c3e50;
+                text-align: left;
+                margin-right: 15px;
+                flex-shrink: 0;
+            }
+
+            td[data-label="Notizen:"] {
+                flex-direction: column;
+                text-align: left;
+                align-items: flex-start;
+            }
+
+            td[data-label="Notizen:"]::before {
+                margin-bottom: 5px;
+            }
+
+            .action-btns {
+                justify-content: flex-end;
+                gap: 10px;
+                margin-top: 5px;
+            }
+        }
+    </style>
 </head>
 
 <body>
 
+    <div id="loginOverlay">
+        <div class="login-box">
+            <h2>🔒 Verschlüsseltes Fahrtenbuch</h2>
+            <p id="loginText">Bitte Master-Passwort eingeben:</p>
+            <input type="password" id="masterPasswort" placeholder="Passwort...">
+            <button type="button" onclick="entsperreApp()" id="loginBtn">Entsperren</button>
+            <p id="loginError" class="hidden" style="color: #e74c3c; font-weight: bold; margin-top: 15px;"></p>
+        </div>
+    </div>
+
     <h1>🚗 Mein lokales Fahrtenbuch</h1>
 
-    <div class="container">
+    <div class="container" id="appContainer" style="display: none;">
         <div class="main-content">
             <h3 id="formTitle">Neue Fahrt eintragen</h3>
             <form id="fahrtForm">
                 <div class="form-grid">
                     <div class="form-group">
-                        <label for="datum">Datum</label>
+                        <label>Datum</label>
                         <input type="date" id="datum" required>
                     </div>
                     <div class="form-group">
-                        <label for="distanz">Distanz (km)</label>
+                        <label>Distanz (km)</label>
                         <input type="number" step="0.1" id="distanz" placeholder="z.B. 25.5" required>
                     </div>
-
                     <div class="form-group">
-                        <label for="start">Startadresse</label>
+                        <label>Startadresse</label>
                         <div class="input-with-btn">
                             <input type="text" id="start" placeholder="Tippen oder 📍" required
                                 ondblclick="openMapPicker('start')">
                             <button type="button" class="btn-icon" onclick="openMapPicker('start')">📍</button>
                         </div>
                     </div>
-
                     <div class="form-group">
-                        <label for="ziel">Zieladresse</label>
+                        <label>Zieladresse</label>
                         <div class="input-with-btn">
                             <input type="text" id="ziel" placeholder="Tippen oder 📍" required
                                 ondblclick="openMapPicker('ziel')">
                             <button type="button" class="btn-icon" onclick="openMapPicker('ziel')">📍</button>
                         </div>
                     </div>
-
                     <div class="form-group full-width">
-                        <label for="notizen">Notizen</label>
+                        <label>Notizen</label>
                         <textarea id="notizen" placeholder="Zweck der Fahrt, Tanken, etc."></textarea>
                     </div>
-
                     <button type="button" class="btn-calc" id="btnBerechnen" onclick="berechneRoute()">📍 Distanz
                         automatisch berechnen</button>
                     <div id="calcStatus" class="loading hidden">Berechne Route...</div>
-
                     <button type="submit" class="btn-submit">💾 Fahrt speichern</button>
                 </div>
             </form>
@@ -435,7 +528,7 @@
             <div class="box">
                 <h3>⚙️ Routing Engine</h3>
                 <div class="form-group">
-                    <label for="apiAuswahl">Methode:</label>
+                    <label>Methode:</label>
                     <select id="apiAuswahl" onchange="toggleApiSettings()">
                         <option value="none">Manuell</option>
                         <option value="osm">OpenStreetMap</option>
@@ -443,41 +536,35 @@
                     </select>
                 </div>
                 <div class="form-group hidden" id="googleKeyContainer">
-                    <label for="apiKey">API Key:</label>
+                    <label>API Key:</label>
                     <input type="password" id="apiKey">
                 </div>
             </div>
 
             <div class="box">
                 <h3>📊 Auswertung</h3>
-                <div class="form-group">
-                    <label for="filterVon">Von:</label>
-                    <input type="date" id="filterVon">
-                </div>
-                <div class="form-group">
-                    <label for="filterBis">Bis:</label>
-                    <input type="date" id="filterBis">
-                </div>
+                <div class="form-group"><label>Von:</label><input type="date" id="filterVon"></div>
+                <div class="form-group"><label>Bis:</label><input type="date" id="filterBis"></div>
                 <div class="info-row"><span>Fahrten:</span><strong id="infoAnzahl">0</strong></div>
                 <div class="info-row"><span>Distanz:</span><strong id="infoDistanz">0 km</strong></div>
                 <div class="info-row"><span>Kosten:</span><strong id="infoKosten">0 €</strong></div>
                 <div class="form-group" style="margin-top: 10px;">
-                    <label>€ / km:</label>
-                    <input type="number" step="0.01" id="kmPreis" value="0.30" onchange="aktualisiereAnsicht()">
+                    <label>€ / km:</label><input type="number" step="0.01" id="kmPreis" value="0.30"
+                        onchange="aktualisiereAnsicht()">
                 </div>
                 <button type="button" class="btn-share" onclick="teileFahrtenPerMail()">✉️ Liste per E-Mail
                     teilen</button>
             </div>
 
             <div class="box">
-                <h3>💾 Backup</h3>
+                <h3>💾 Backup (Export/Import)</h3>
                 <div class="form-group">
-                    <label>Passwort:</label>
-                    <input type="password" id="backupPasswort" placeholder="AES-Verschlüsselung">
+                    <label>Export-Passwort (optional neu):</label>
+                    <input type="password" id="backupPasswort" placeholder="Für Datei-Verschlüsselung">
                 </div>
-                <button type="button" class="btn-export" onclick="exportDaten()">⬇️ Export</button>
+                <button type="button" class="btn-export" onclick="exportDaten()">⬇️ Backup herunterladen</button>
                 <div class="file-input-wrapper">
-                    <button type="button" class="btn-import">⬆️ Import (Merge)</button>
+                    <button type="button" class="btn-import">⬆️ Backup laden (Merge)</button>
                     <input type="file" id="importFile" accept=".json,.enc" onchange="importDaten(event)">
                 </div>
             </div>
@@ -488,15 +575,123 @@
         <div class="map-container">
             <div id="mapView"></div>
             <button type="button" onclick="closeMapPicker()"
-                style="background:#e74c3c; padding: 15px; font-weight: bold;">Zurück / Abbrechen</button>
+                style="background:#e74c3c; padding: 15px; font-weight: bold; color:white; border:none; cursor:pointer;">Zurück
+                / Abbrechen</button>
         </div>
     </div>
 
     <script>
-        const STORAGE_KEY = 'mein_fahrtenbuch_daten';
+        const STORAGE_KEY = 'mein_fahrtenbuch_enc_daten';
+        const SALT_KEY = 'mein_fahrtenbuch_salt';
         const SETTINGS_KEY = 'mein_fahrtenbuch_settings';
+
         let fahrten = [];
         let aktuellGefilterteFahrten = [];
+        let inMemorySchluessel = null; // Hält den Schlüssel nur, solange der Tab offen ist!
+
+        // --- BASIS KRYPTOGRAFIE ---
+        function bufferToBase64(b) { return btoa(String.fromCharCode(...new Uint8Array(b))); }
+        function base64ToBuffer(s) { return Uint8Array.from(atob(s), c => c.charCodeAt(0)).buffer; }
+
+        async function erstelleCryptoKey(passwort, saltBuffer) {
+            const m = await crypto.subtle.importKey("raw", new TextEncoder().encode(passwort), "PBKDF2", false, ["deriveKey"]);
+            return crypto.subtle.deriveKey({ name: "PBKDF2", salt: saltBuffer, iterations: 100000, hash: "SHA-256" }, m, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]);
+        }
+
+        // --- ENTSPERREN LOGIK ---
+        window.onload = () => {
+            // Prüfen, ob bereits verschlüsselte Daten existieren
+            const gespeicherteDaten = localStorage.getItem(STORAGE_KEY);
+            if (!gespeicherteDaten) {
+                document.getElementById('loginText').innerText = "Willkommen! Bitte wähle ein neues Master-Passwort für deine verschlüsselte Datenbank:";
+                document.getElementById('loginBtn').innerText = "Datenbank erstellen";
+            }
+
+            // Enter-Taste im Passwort-Feld abfangen
+            document.getElementById('masterPasswort').addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') entsperreApp();
+            });
+        };
+
+        async function entsperreApp() {
+            const pwd = document.getElementById('masterPasswort').value;
+            const errorLabel = document.getElementById('loginError');
+            if (!pwd) return;
+
+            try {
+                let saltStr = localStorage.getItem(SALT_KEY);
+                let saltBuffer;
+
+                if (!saltStr) {
+                    // Ersteinrichtung: Neuen Salt generieren und speichern
+                    saltBuffer = crypto.getRandomValues(new Uint8Array(16));
+                    localStorage.setItem(SALT_KEY, bufferToBase64(saltBuffer));
+                } else {
+                    saltBuffer = base64ToBuffer(saltStr);
+                }
+
+                inMemorySchluessel = await erstelleCryptoKey(pwd, saltBuffer);
+
+                const gespeicherteDaten = localStorage.getItem(STORAGE_KEY);
+                if (gespeicherteDaten) {
+                    // Entschlüsselungsversuch
+                    const obj = JSON.parse(gespeicherteDaten);
+                    const iv = base64ToBuffer(obj.iv);
+                    const encData = base64ToBuffer(obj.data);
+
+                    try {
+                        const dec = await crypto.subtle.decrypt({ name: "AES-GCM", iv: iv }, inMemorySchluessel, encData);
+                        fahrten = JSON.parse(new TextDecoder().decode(dec));
+                    } catch (decErr) {
+                        throw new Error("Falsches Passwort!");
+                    }
+                } else {
+                    // Leere, neue Datenbank
+                    fahrten = [];
+                    await speichereDaten(); // Initial einmal verschlüsselt speichern
+                }
+
+                // Erfolgreich! App anzeigen.
+                document.getElementById('loginOverlay').style.display = 'none';
+                document.getElementById('appContainer').style.display = 'grid';
+                if (window.innerWidth <= 768) document.getElementById('appContainer').style.display = 'flex'; // Mobile Fix
+
+                initialisiereApp();
+
+            } catch (err) {
+                errorLabel.innerText = err.message;
+                errorLabel.classList.remove('hidden');
+            }
+        }
+
+        // --- APP INITIALISIERUNG (nach Entsperren) ---
+        function initialisiereApp() {
+            const s = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}');
+            if (s.apiAuswahl) document.getElementById('apiAuswahl').value = s.apiAuswahl;
+            if (s.apiKey) document.getElementById('apiKey').value = s.apiKey;
+            if (s.kmPreis) document.getElementById('kmPreis').value = s.kmPreis;
+
+            document.getElementById('filterVon').value = getErsterTagDesMonats();
+            document.getElementById('filterBis').value = getLetzterTagDesMonats();
+
+            aktualisiereAnsicht();
+            toggleApiSettings();
+        }
+
+        // --- DATEN VERSCHLÜSSELT SPEICHERN ---
+        async function speichereDaten() {
+            if (!inMemorySchluessel) return;
+            const iv = crypto.getRandomValues(new Uint8Array(12));
+            const enc = await crypto.subtle.encrypt(
+                { name: "AES-GCM", iv: iv },
+                inMemorySchluessel,
+                new TextEncoder().encode(JSON.stringify(fahrten))
+            );
+            localStorage.setItem(STORAGE_KEY, JSON.stringify({
+                iv: bufferToBase64(iv),
+                data: bufferToBase64(enc)
+            }));
+        }
 
         // --- HELPERS ---
         function formatLocalDatum(d) { return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; }
@@ -504,46 +699,28 @@
         function getErsterTagDesMonats() { const d = new Date(); return formatLocalDatum(new Date(d.getFullYear(), d.getMonth(), 1)); }
         function getLetzterTagDesMonats() { const d = new Date(); return formatLocalDatum(new Date(d.getFullYear(), d.getMonth() + 1, 0)); }
 
-        // --- MAP PICKER (Jetzt mit CARTO Tiles wg. Referer Blockade) ---
+        // --- MAP PICKER ---
         let pickerMap = null, pickerMarker = null, currentTargetField = '';
         function openMapPicker(fieldId) {
             currentTargetField = fieldId;
             document.getElementById('mapModal').style.display = 'flex';
             if (!pickerMap) {
                 pickerMap = L.map('mapView').setView([51.1, 10.4], 6);
-                L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-                    attribution: '&copy; OpenStreetMap &copy; CARTO', subdomains: 'abcd', maxZoom: 19
-                }).addTo(pickerMap);
+                L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { maxZoom: 19 }).addTo(pickerMap);
                 pickerMap.on('click', async (e) => {
                     const { lat, lng } = e.latlng;
                     if (pickerMarker) pickerMap.removeLayer(pickerMarker);
                     pickerMarker = L.marker([lat, lng]).addTo(pickerMap);
                     const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
                     const data = await res.json();
-                    if (data && data.display_name) {
-                        document.getElementById(currentTargetField).value = data.display_name;
-                        closeMapPicker();
-                    }
+                    if (data && data.display_name) { document.getElementById(currentTargetField).value = data.display_name; closeMapPicker(); }
                 });
             }
             setTimeout(() => { pickerMap.invalidateSize(); pickerMap.locate({ setView: true, maxZoom: 14 }); }, 100);
         }
         function closeMapPicker() { document.getElementById('mapModal').style.display = 'none'; }
 
-        // --- DATA ---
-        window.onload = () => {
-            const d = localStorage.getItem(STORAGE_KEY); if (d) fahrten = JSON.parse(d);
-            const s = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}');
-            if (s.apiAuswahl) document.getElementById('apiAuswahl').value = s.apiAuswahl;
-            if (s.apiKey) document.getElementById('apiKey').value = s.apiKey;
-            if (s.kmPreis) document.getElementById('kmPreis').value = s.kmPreis;
-            document.getElementById('filterVon').value = getErsterTagDesMonats();
-            document.getElementById('filterBis').value = getLetzterTagDesMonats();
-            aktualisiereAnsicht();
-            toggleApiSettings();
-        };
-
-        function speichereDaten() { localStorage.setItem(STORAGE_KEY, JSON.stringify(fahrten)); }
+        // --- ROUTING ---
         function toggleApiSettings() {
             const a = document.getElementById('apiAuswahl').value;
             document.getElementById('googleKeyContainer').classList.toggle('hidden', a !== 'google');
@@ -571,6 +748,7 @@
             } catch (e) { alert("Fehler: " + e); } finally { btn.disabled = false; st.classList.add('hidden'); }
         }
 
+        // --- TABELLE ---
         function aktualisiereAnsicht() {
             localStorage.setItem(SETTINGS_KEY, JSON.stringify({ apiAuswahl: document.getElementById('apiAuswahl').value, apiKey: document.getElementById('apiKey').value, kmPreis: document.getElementById('kmPreis').value }));
             const v = document.getElementById('filterVon').value, b = document.getElementById('filterBis').value, p = parseFloat(document.getElementById('kmPreis').value);
@@ -586,7 +764,6 @@
             aktuellGefilterteFahrten.forEach(x => {
                 const k = x.distanz * p;
                 const tr = document.createElement('tr');
-                // HIER WICHTIG: Die data-label Attribute für die Smartphone-Ansicht!
                 tr.innerHTML = `
                     <td data-label="Datum:">${new Date(x.datum).toLocaleDateString('de-DE')}</td>
                     <td data-label="Start:">${x.start}</td>
@@ -595,8 +772,8 @@
                     <td data-label="Distanz:">${x.distanz.toFixed(1).replace('.', ',')} km</td>
                     <td data-label="Kosten:">${k.toFixed(2).replace('.', ',')} €</td>
                     <td data-label="" class="action-btns">
-                        <button class="copy-btn" onclick="dupliziereFahrt(${x.id})">Kopie</button>
-                        <button class="delete-btn" onclick="loescheFahrt(${x.id})">Löschen</button>
+                        <button type="button" class="copy-btn" onclick="dupliziereFahrt(${x.id})">Kopie</button>
+                        <button type="button" class="delete-btn" onclick="loescheFahrt(${x.id})">Löschen</button>
                     </td>`;
                 tb.appendChild(tr); sD += x.distanz; sK += k;
             });
@@ -606,21 +783,17 @@
             document.getElementById('datum').value = getLetztesDatum();
         }
 
+        // --- AKTIONEN ---
         function teileFahrtenPerMail() {
-            if (aktuellGefilterteFahrten.length === 0) return alert("Es gibt aktuell keine Fahrten zum Teilen.");
-            let text = "Hier ist der Auszug aus dem Fahrtenbuch:\n\n--- ZUSAMMENFASSUNG ---\n";
-            text += `Anzahl Fahrten: ${document.getElementById('infoAnzahl').innerText}\n`;
-            text += `Gesamtdistanz:  ${document.getElementById('infoDistanz').innerText}\n`;
-            text += `Gesamtkosten:   ${document.getElementById('infoKosten').innerText}\n\n--- EINZELFAHRTEN ---\n`;
-            const preisProKm = parseFloat(document.getElementById('kmPreis').value) || 0.30;
+            if (aktuellGefilterteFahrten.length === 0) return alert("Nichts zu teilen.");
+            let text = "Hier ist der Auszug:\n\n--- ZUSAMMENFASSUNG ---\n";
+            text += `Anzahl: ${document.getElementById('infoAnzahl').innerText}\nDistanz:  ${document.getElementById('infoDistanz').innerText}\nKosten:   ${document.getElementById('infoKosten').innerText}\n\n--- FAHRTEN ---\n`;
             aktuellGefilterteFahrten.forEach(f => {
-                text += `Datum:   ${new Date(f.datum).toLocaleDateString('de-DE')}\n`;
-                text += `Strecke: ${f.start} -> ${f.ziel}\n`;
-                if (f.notizen && f.notizen.trim() !== "") text += `Zweck:   ${f.notizen}\n`;
-                text += `Distanz: ${f.distanz.toFixed(1).replace('.', ',')} km (Kosten: ${(f.distanz * preisProKm).toFixed(2).replace('.', ',')} €)\n`;
-                text += "---------------------------\n";
+                text += `${new Date(f.datum).toLocaleDateString('de-DE')} | ${f.start} -> ${f.ziel}\n`;
+                if (f.notizen) text += `Zweck: ${f.notizen}\n`;
+                text += `-> ${f.distanz.toFixed(1).replace('.', ',')} km\n\n`;
             });
-            window.location.href = `mailto:?subject=${encodeURIComponent("Fahrtenbuch Auszug")}&body=${encodeURIComponent(text)}`;
+            window.location.href = `mailto:?subject=${encodeURIComponent("Fahrtenbuch")}&body=${encodeURIComponent(text)}`;
         }
 
         function dupliziereFahrt(id) {
@@ -632,52 +805,6 @@
             }
         }
 
-        document.getElementById('fahrtForm').onsubmit = (e) => {
+        document.getElementById('fahrtForm').onsubmit = async (e) => {
             e.preventDefault();
-            fahrten.push({ id: Date.now(), datum: document.getElementById('datum').value, start: document.getElementById('start').value, ziel: document.getElementById('ziel').value, distanz: parseFloat(document.getElementById('distanz').value.replace(',', '.')), notizen: document.getElementById('notizen').value });
-            speichereDaten();
-            ['distanz', 'start', 'ziel', 'notizen'].forEach(k => document.getElementById(k).value = '');
-            aktualisiereAnsicht();
-        };
-
-        function loescheFahrt(id) { if (confirm("Löschen?")) { fahrten = fahrten.filter(x => x.id !== id); speichereDaten(); aktualisiereAnsicht(); } }
-        ['filterVon', 'filterBis'].forEach(id => document.getElementById(id).onchange = aktualisiereAnsicht);
-
-        // --- CRYPTO ---
-        function bufferToBase64(b) { return btoa(String.fromCharCode(...new Uint8Array(b))); }
-        function base64ToBuffer(s) { return Uint8Array.from(atob(s), c => c.charCodeAt(0)).buffer; }
-        async function getKey(p, s) {
-            const m = await crypto.subtle.importKey("raw", new TextEncoder().encode(p), "PBKDF2", false, ["deriveKey"]);
-            return crypto.subtle.deriveKey({ name: "PBKDF2", salt: s, iterations: 100000, hash: "SHA-256" }, m, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]);
-        }
-
-        async function exportDaten() {
-            const p = document.getElementById('backupPasswort').value; if (!p) return alert("Passwort!");
-            const s = crypto.getRandomValues(new Uint8Array(16)), i = crypto.getRandomValues(new Uint8Array(12)), k = await getKey(p, s);
-            const e = await crypto.subtle.encrypt({ name: "AES-GCM", iv: i }, k, new TextEncoder().encode(JSON.stringify(fahrten)));
-            const b = new Blob([JSON.stringify({ salt: bufferToBase64(s), iv: bufferToBase64(i), data: bufferToBase64(e) })], { type: "application/json" });
-            const a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = `Backup_${formatLocalDatum(new Date())}.enc`; a.click();
-        }
-
-        async function importDaten(ev) {
-            const p = document.getElementById('backupPasswort').value, f = ev.target.files[0]; if (!f || !p) return alert("Passwort/Datei!");
-            const reader = new FileReader();
-            reader.onload = async (e) => {
-                try {
-                    const obj = JSON.parse(e.target.result), s = base64ToBuffer(obj.salt), i = base64ToBuffer(obj.iv), d = base64ToBuffer(obj.data), k = await getKey(p, s);
-                    const dec = await crypto.subtle.decrypt({ name: "AES-GCM", iv: i }, k, d);
-                    const list = JSON.parse(new TextDecoder().decode(dec));
-                    let count = 0;
-                    list.forEach(item => {
-                        const exists = fahrten.some(x => x.datum === item.datum && x.start === item.start && x.ziel === item.ziel && (x.notizen || "") === (item.notizen || ""));
-                        if (!exists) { fahrten.push(item); count++; }
-                    });
-                    speichereDaten(); aktualisiereAnsicht(); alert(count + " neue Fahrten.");
-                } catch (err) { alert("Fehler (Passwort?)"); }
-            };
-            reader.readAsText(f);
-        }
-    </script>
-</body>
-
-</html>
+            fahrten.push({ id: Date.now(), datum:
