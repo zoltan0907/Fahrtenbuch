@@ -13,22 +13,25 @@
         h1 { text-align: center; color: #2c3e50; }
         .container { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 1fr 320px; gap: 20px; }
         
+        /* Sidebar & Boxen */
         .sidebar { display: flex; flex-direction: column; gap: 20px; position: sticky; top: 20px; }
         .box { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .box h3 { margin-top: 0; border-bottom: 2px solid #3498db; padding-bottom: 10px; font-size: 18px; }
         .info-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 15px; }
         .info-row strong { color: #2980b9; }
         
+        /* Formulare */
         .form-group { display: flex; flex-direction: column; margin-bottom: 12px;}
         label { margin-bottom: 5px; font-size: 13px; font-weight: bold; color: #555; }
         input, select { padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; width: 100%; box-sizing: border-box; }
         
         .input-with-btn { display: flex; gap: 5px; }
-        .btn-icon { width: auto; padding: 10px 15px; background-color: #34495e; }
+        .btn-icon { width: auto; padding: 10px 15px; background-color: #34495e; color: white; border: none; border-radius: 4px; cursor: pointer;}
         
         .main-content { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
         
+        /* Buttons */
         button { background-color: #27ae60; color: white; border: none; padding: 12px; border-radius: 4px; font-size: 15px; cursor: pointer; transition: background 0.3s; font-weight: bold; }
         button:hover { background-color: #2ecc71; }
         .btn-submit { grid-column: span 2; margin-top: 10px;}
@@ -36,14 +39,17 @@
         .btn-calc:hover { background-color: #f1c40f; }
         .btn-calc:disabled { background-color: #bdc3c7; cursor: not-allowed; }
         
+        /* Tabelle & Spaltenfilter */
         table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 13px; }
-        th, td { padding: 10px 8px; text-align: left; border-bottom: 1px solid #ddd; }
+        th, td { padding: 10px 8px; text-align: left; border-bottom: 1px solid #ddd; vertical-align: top; }
         th { background-color: #f8f9fa; color: #2c3e50; }
         
-        .action-btns { display: flex; gap: 5px; }
-        .delete-btn { background-color: #e74c3c; padding: 5px 8px; font-size: 11px; }
+        .col-filter { width: 100%; padding: 5px; font-size: 11px; margin-top: 5px; border: 1px solid #bdc3c7; border-radius: 3px; font-weight: normal; }
+        
+        .action-btns { display: flex; gap: 5px; flex-wrap: wrap; }
+        .delete-btn { background-color: #e74c3c; padding: 6px 10px; font-size: 11px; border-radius: 3px; }
         .delete-btn:hover { background-color: #c0392b; }
-        .copy-btn { background-color: #3498db; padding: 5px 8px; font-size: 11px; }
+        .copy-btn { background-color: #3498db; padding: 6px 10px; font-size: 11px; border-radius: 3px; }
         .copy-btn:hover { background-color: #2980b9; }
 
         .hidden { display: none !important; }
@@ -106,9 +112,9 @@
             <table id="fahrtenTabelle">
                 <thead>
                     <tr>
-                        <th>Datum</th>
-                        <th>Start</th>
-                        <th>Ziel</th>
+                        <th>Datum<br><input type="text" id="colFilterDatum" class="col-filter" placeholder="z.B. 2024 oder .05." onkeyup="aktualisiereAnsicht()"></th>
+                        <th>Start<br><input type="text" id="colFilterStart" class="col-filter" placeholder="Suchen..." onkeyup="aktualisiereAnsicht()"></th>
+                        <th>Ziel<br><input type="text" id="colFilterZiel" class="col-filter" placeholder="Suchen..." onkeyup="aktualisiereAnsicht()"></th>
                         <th>Distanz</th>
                         <th>Kosten</th>
                         <th>Aktionen</th>
@@ -136,7 +142,7 @@
             </div>
 
             <div class="box">
-                <h3>📊 Auswertung</h3>
+                <h3>📊 Globale Auswertung</h3>
                 <div class="form-group">
                     <label for="filterVon">Von:</label>
                     <input type="date" id="filterVon">
@@ -146,9 +152,9 @@
                     <input type="date" id="filterBis">
                 </div>
 
-                <div class="info-row"><span>Anzahl Fahrten:</span><strong id="infoAnzahl">0</strong></div>
-                <div class="info-row"><span>Gesamtdistanz:</span><strong id="infoDistanz">0.0 km</strong></div>
-                <div class="info-row"><span>Gesamtkosten:</span><strong id="infoKosten">0,00 €</strong></div>
+                <div class="info-row"><span>Angezeigte Fahrten:</span><strong id="infoAnzahl">0</strong></div>
+                <div class="info-row"><span>Summe Distanz:</span><strong id="infoDistanz">0.0 km</strong></div>
+                <div class="info-row"><span>Summe Kosten:</span><strong id="infoKosten">0,00 €</strong></div>
                 
                 <div class="form-group" style="margin-top: 15px; border-top: 1px solid #eee; padding-top: 10px;">
                     <label for="kmPreis">Preis pro km (€):</label>
@@ -271,23 +277,63 @@
 
         function aktualisiereAnsicht() {
             speichereEinstellungen();
-            const v = document.getElementById('filterVon').value, b = document.getElementById('filterBis').value, p = parseFloat(document.getElementById('kmPreis').value) || 0.30;
-            let f = fahrten.filter(f => (!v || f.datum >= v) && (!b || f.datum <= b)).sort((x,y) => new Date(y.datum) - new Date(x.datum));
-            const tb = document.getElementById('tabelleBody'); tb.innerHTML = '';
+            
+            // Sidebar-Filter (Zeitraum)
+            const v = document.getElementById('filterVon').value;
+            const b = document.getElementById('filterBis').value;
+            const p = parseFloat(document.getElementById('kmPreis').value) || 0.30;
+            
+            // Spalten-Filter (Text)
+            const colDatum = document.getElementById('colFilterDatum').value.toLowerCase();
+            const colStart = document.getElementById('colFilterStart').value.toLowerCase();
+            const colZiel = document.getElementById('colFilterZiel').value.toLowerCase();
+
+            // Filtern
+            let f = fahrten.filter(fahrt => {
+                // 1. Zeitfenster-Filter prüfen
+                if (v && fahrt.datum < v) return false;
+                if (b && fahrt.datum > b) return false;
+
+                // 2. Spalten-Filter prüfen
+                const deDatum = new Date(fahrt.datum).toLocaleDateString('de-DE').toLowerCase();
+                if (colDatum && !deDatum.includes(colDatum)) return false;
+                if (colStart && !fahrt.start.toLowerCase().includes(colStart)) return false;
+                if (colZiel && !fahrt.ziel.toLowerCase().includes(colZiel)) return false;
+
+                return true;
+            }).sort((x,y) => new Date(y.datum) - new Date(x.datum));
+
+            // Tabelle aufbauen
+            const tb = document.getElementById('tabelleBody'); 
+            tb.innerHTML = '';
             let sD = 0, sK = 0;
+            
             f.forEach(fahrt => {
                 const k = fahrt.distanz * p;
                 const tr = document.createElement('tr');
-                tr.innerHTML = `<td>${new Date(fahrt.datum).toLocaleDateString('de-DE')}</td><td>${fahrt.start}</td><td>${fahrt.ziel}</td><td>${fahrt.distanz.toFixed(1).replace('.',',')} km</td><td>${k.toFixed(2).replace('.',',')} €</td><td class="action-btns"><button class="copy-btn" onclick="dupliziereFahrt(${fahrt.id})">Kopieren</button><button class="delete-btn" onclick="loescheFahrt(${fahrt.id})">Löschen</button></td>`;
-                tb.appendChild(tr); sD += fahrt.distanz; sK += k;
+                tr.innerHTML = `
+                    <td>${new Date(fahrt.datum).toLocaleDateString('de-DE')}</td>
+                    <td>${fahrt.start}</td>
+                    <td>${fahrt.ziel}</td>
+                    <td>${fahrt.distanz.toFixed(1).replace('.',',')} km</td>
+                    <td>${k.toFixed(2).replace('.',',')} €</td>
+                    <td class="action-btns">
+                        <button type="button" class="copy-btn" onclick="dupliziereFahrt(${fahrt.id})">Kopieren</button>
+                        <button type="button" class="delete-btn" onclick="loescheFahrt(${fahrt.id})">Löschen</button>
+                    </td>
+                `;
+                tb.appendChild(tr); 
+                sD += fahrt.distanz; 
+                sK += k;
             });
+
+            // Auswertung rechts aktualisieren (Reagiert jetzt auch auf die Spaltenfilter!)
             document.getElementById('infoAnzahl').innerText = f.length;
             document.getElementById('infoDistanz').innerText = sD.toFixed(1).replace('.',',') + ' km';
             document.getElementById('infoKosten').innerText = sK.toFixed(2).replace('.',',') + ' €';
             document.getElementById('datum').value = getLetztesDatum();
         }
 
-        // --- NEUE FUNKTION: DUPLIZIEREN ---
         function dupliziereFahrt(id) {
             const fahrt = fahrten.find(f => f.id === id);
             if (fahrt) {
@@ -295,11 +341,7 @@
                 document.getElementById('ziel').value = fahrt.ziel;
                 document.getElementById('distanz').value = fahrt.distanz;
                 document.getElementById('datum').value = getLetztesDatum();
-                
-                // Zum Formular scrollen
                 window.scrollTo({ top: 0, behavior: 'smooth' });
-                
-                // Optischer Hinweis
                 document.getElementById('formTitle').innerText = "Fahrt kopiert - bitte Datum prüfen";
                 setTimeout(() => { document.getElementById('formTitle').innerText = "Neue Fahrt eintragen"; }, 3000);
             }
@@ -307,13 +349,30 @@
 
         document.getElementById('fahrtForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            fahrten.push({ id: Date.now(), datum: document.getElementById('datum').value, start: document.getElementById('start').value, ziel: document.getElementById('ziel').value, distanz: parseFloat(document.getElementById('distanz').value.replace(',','.')) });
+            fahrten.push({ 
+                id: Date.now(), 
+                datum: document.getElementById('datum').value, 
+                start: document.getElementById('start').value, 
+                ziel: document.getElementById('ziel').value, 
+                distanz: parseFloat(document.getElementById('distanz').value.replace(',','.')) 
+            });
             speichereDaten();
             ['distanz','start','ziel'].forEach(id => document.getElementById(id).value = '');
+            
+            // Spaltenfilter nach neuem Eintrag zurücksetzen, falls welche aktiv waren
+            ['colFilterDatum', 'colFilterStart', 'colFilterZiel'].forEach(id => document.getElementById(id).value = '');
+            
             aktualisiereAnsicht();
         });
 
-        function loescheFahrt(id) { if(confirm("Löschen?")) { fahrten = fahrten.filter(f => f.id !== id); speichereDaten(); aktualisiereAnsicht(); } }
+        function loescheFahrt(id) { 
+            if(confirm("Möchtest du diese Fahrt wirklich löschen?")) { 
+                fahrten = fahrten.filter(f => f.id !== id); 
+                speichereDaten(); 
+                aktualisiereAnsicht(); 
+            } 
+        }
+
         ['filterVon', 'filterBis'].forEach(id => document.getElementById(id).addEventListener('change', aktualisiereAnsicht));
     </script>
 </body>
