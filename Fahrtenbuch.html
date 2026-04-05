@@ -1,75 +1,322 @@
 <!DOCTYPE html>
 <html lang="de">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lokales Fahrtenbuch Pro</title>
-    
+
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; color: #333; }
-        h1 { text-align: center; color: #2c3e50; }
-        .container { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 1fr 320px; gap: 20px; }
-        
-        .sidebar { display: flex; flex-direction: column; gap: 20px; position: sticky; top: 20px; }
-        .box { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .box h3 { margin-top: 0; border-bottom: 2px solid #3498db; padding-bottom: 10px; font-size: 18px; }
-        .info-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 15px; }
-        .info-row strong { color: #2980b9; }
-        
-        .form-group { display: flex; flex-direction: column; margin-bottom: 12px;}
-        label { margin-bottom: 5px; font-size: 13px; font-weight: bold; color: #555; }
-        input, select { padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; width: 100%; box-sizing: border-box; }
-        
-        .input-with-btn { display: flex; gap: 5px; }
-        .btn-icon { width: auto; padding: 10px 15px; background-color: #34495e; color: white; border: none; border-radius: 4px; cursor: pointer;}
-        
-        .main-content { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
-        
-        button { background-color: #27ae60; color: white; border: none; padding: 12px; border-radius: 4px; font-size: 15px; cursor: pointer; transition: background 0.3s; font-weight: bold; }
-        button:hover { background-color: #2ecc71; }
-        .btn-submit { grid-column: span 2; margin-top: 10px;}
-        .btn-calc { background-color: #f39c12; grid-column: span 2; }
-        .btn-calc:hover { background-color: #f1c40f; }
-        .btn-calc:disabled { background-color: #bdc3c7; cursor: not-allowed; }
-        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 20px;
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            position: sticky;
+            top: 20px;
+        }
+
+        .box {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .box h3 {
+            margin-top: 0;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+            font-size: 18px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            font-size: 15px;
+        }
+
+        .info-row strong {
+            color: #2980b9;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 12px;
+        }
+
+        label {
+            margin-bottom: 5px;
+            font-size: 13px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        input,
+        select {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .input-with-btn {
+            display: flex;
+            gap: 5px;
+        }
+
+        .btn-icon {
+            width: auto;
+            padding: 10px 15px;
+            background-color: #34495e;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .main-content {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        button {
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 4px;
+            font-size: 15px;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background-color: #2ecc71;
+        }
+
+        .btn-submit {
+            grid-column: span 2;
+            margin-top: 10px;
+        }
+
+        .btn-calc {
+            background-color: #f39c12;
+            grid-column: span 2;
+        }
+
+        .btn-calc:hover {
+            background-color: #f1c40f;
+        }
+
+        .btn-calc:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+
         /* Backup Buttons */
-        .btn-export { background-color: #8e44ad; width: 100%; margin-bottom: 10px; }
-        .btn-export:hover { background-color: #9b59b6; }
-        .btn-import { background-color: #2c3e50; width: 100%; }
-        .btn-import:hover { background-color: #34495e; }
-        .file-input-wrapper { position: relative; overflow: hidden; display: inline-block; width: 100%; }
-        .file-input-wrapper input[type=file] { font-size: 100px; position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; height: 100%; }
-        
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 13px; }
-        th, td { padding: 10px 8px; text-align: left; border-bottom: 1px solid #ddd; vertical-align: top; }
-        th { background-color: #f8f9fa; color: #2c3e50; }
-        
-        .col-filter { width: 100%; padding: 5px; font-size: 11px; margin-top: 5px; border: 1px solid #bdc3c7; border-radius: 3px; font-weight: normal; }
-        .action-btns { display: flex; gap: 5px; flex-wrap: wrap; }
-        .delete-btn { background-color: #e74c3c; padding: 6px 10px; font-size: 11px; border-radius: 3px; }
-        .delete-btn:hover { background-color: #c0392b; }
-        .copy-btn { background-color: #3498db; padding: 6px 10px; font-size: 11px; border-radius: 3px; }
-        .copy-btn:hover { background-color: #2980b9; }
+        .btn-export {
+            background-color: #8e44ad;
+            width: 100%;
+            margin-bottom: 10px;
+        }
 
-        .hidden { display: none !important; }
-        .loading { font-size: 12px; color: #e67e22; margin-top: 5px; font-weight: bold; }
+        .btn-export:hover {
+            background-color: #9b59b6;
+        }
 
-        .map-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center; }
-        .map-container { background: white; width: 95%; max-width: 600px; height: 70vh; border-radius: 8px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
-        .map-header { padding: 15px; background: #2c3e50; color: white; display: flex; justify-content: space-between; align-items: center; font-weight: bold; }
-        .map-header button { background: #e74c3c; padding: 8px 15px; font-size: 13px; margin: 0; }
-        #mapView { flex-grow: 1; width: 100%; cursor: crosshair; }
+        .btn-import {
+            background-color: #2c3e50;
+            width: 100%;
+        }
+
+        .btn-import:hover {
+            background-color: #34495e;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-input-wrapper input[type=file] {
+            font-size: 100px;
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            cursor: pointer;
+            height: 100%;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 13px;
+        }
+
+        th,
+        td {
+            padding: 10px 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+            vertical-align: top;
+        }
+
+        th {
+            background-color: #f8f9fa;
+            color: #2c3e50;
+        }
+
+        .col-filter {
+            width: 100%;
+            padding: 5px;
+            font-size: 11px;
+            margin-top: 5px;
+            border: 1px solid #bdc3c7;
+            border-radius: 3px;
+            font-weight: normal;
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+
+        .delete-btn {
+            background-color: #e74c3c;
+            padding: 6px 10px;
+            font-size: 11px;
+            border-radius: 3px;
+        }
+
+        .delete-btn:hover {
+            background-color: #c0392b;
+        }
+
+        .copy-btn {
+            background-color: #3498db;
+            padding: 6px 10px;
+            font-size: 11px;
+            border-radius: 3px;
+        }
+
+        .copy-btn:hover {
+            background-color: #2980b9;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .loading {
+            font-size: 12px;
+            color: #e67e22;
+            margin-top: 5px;
+            font-weight: bold;
+        }
+
+        .map-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .map-container {
+            background: white;
+            width: 95%;
+            max-width: 600px;
+            height: 70vh;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .map-header {
+            padding: 15px;
+            background: #2c3e50;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+        }
+
+        .map-header button {
+            background: #e74c3c;
+            padding: 8px 15px;
+            font-size: 13px;
+            margin: 0;
+        }
+
+        #mapView {
+            flex-grow: 1;
+            width: 100%;
+            cursor: crosshair;
+        }
 
         @media (max-width: 768px) {
-            .container { grid-template-columns: 1fr; }
-            .form-grid { grid-template-columns: 1fr; }
+            .container {
+                grid-template-columns: 1fr;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
+
 <body>
 
     <h1>🚗 Mein lokales Fahrtenbuch</h1>
@@ -87,26 +334,31 @@
                         <label for="distanz">Distanz (km)</label>
                         <input type="number" step="0.1" id="distanz" placeholder="z.B. 25.5" required>
                     </div>
-                    
+
                     <div class="form-group">
                         <label for="start">Startadresse</label>
                         <div class="input-with-btn">
-                            <input type="text" id="start" placeholder="Tippen oder 📍 klicken" required ondblclick="openMapPicker('start')">
-                            <button type="button" class="btn-icon" onclick="openMapPicker('start')" title="Auf Karte wählen">📍</button>
+                            <input type="text" id="start" placeholder="Tippen oder 📍 klicken" required
+                                ondblclick="openMapPicker('start')">
+                            <button type="button" class="btn-icon" onclick="openMapPicker('start')"
+                                title="Auf Karte wählen">📍</button>
                         </div>
                     </div>
-                    
+
                     <div class="form-group">
                         <label for="ziel">Zieladresse</label>
                         <div class="input-with-btn">
-                            <input type="text" id="ziel" placeholder="Tippen oder 📍 klicken" required ondblclick="openMapPicker('ziel')">
-                            <button type="button" class="btn-icon" onclick="openMapPicker('ziel')" title="Auf Karte wählen">📍</button>
+                            <input type="text" id="ziel" placeholder="Tippen oder 📍 klicken" required
+                                ondblclick="openMapPicker('ziel')">
+                            <button type="button" class="btn-icon" onclick="openMapPicker('ziel')"
+                                title="Auf Karte wählen">📍</button>
                         </div>
                     </div>
-                    
-                    <button type="button" class="btn-calc" id="btnBerechnen" onclick="berechneRoute()">📍 Distanz automatisch berechnen</button>
+
+                    <button type="button" class="btn-calc" id="btnBerechnen" onclick="berechneRoute()">📍 Distanz
+                        automatisch berechnen</button>
                     <div id="calcStatus" class="loading hidden">Berechne Route... Bitte warten.</div>
-                    
+
                     <button type="submit" class="btn-submit">💾 Fahrt speichern</button>
                 </div>
             </form>
@@ -114,9 +366,12 @@
             <table id="fahrtenTabelle">
                 <thead>
                     <tr>
-                        <th>Datum<br><input type="text" id="colFilterDatum" class="col-filter" placeholder="Suchen..." onkeyup="aktualisiereAnsicht()"></th>
-                        <th>Start<br><input type="text" id="colFilterStart" class="col-filter" placeholder="Suchen..." onkeyup="aktualisiereAnsicht()"></th>
-                        <th>Ziel<br><input type="text" id="colFilterZiel" class="col-filter" placeholder="Suchen..." onkeyup="aktualisiereAnsicht()"></th>
+                        <th>Datum<br><input type="text" id="colFilterDatum" class="col-filter" placeholder="Suchen..."
+                                onkeyup="aktualisiereAnsicht()"></th>
+                        <th>Start<br><input type="text" id="colFilterStart" class="col-filter" placeholder="Suchen..."
+                                onkeyup="aktualisiereAnsicht()"></th>
+                        <th>Ziel<br><input type="text" id="colFilterZiel" class="col-filter" placeholder="Suchen..."
+                                onkeyup="aktualisiereAnsicht()"></th>
                         <th>Distanz</th>
                         <th>Kosten</th>
                         <th>Aktionen</th>
@@ -157,7 +412,7 @@
                 <div class="info-row"><span>Angezeigte Fahrten:</span><strong id="infoAnzahl">0</strong></div>
                 <div class="info-row"><span>Summe Distanz:</span><strong id="infoDistanz">0.0 km</strong></div>
                 <div class="info-row"><span>Summe Kosten:</span><strong id="infoKosten">0,00 €</strong></div>
-                
+
                 <div class="form-group" style="margin-top: 15px; border-top: 1px solid #eee; padding-top: 10px;">
                     <label for="kmPreis">Preis pro km (€):</label>
                     <input type="number" step="0.01" id="kmPreis" value="0.30" onchange="aktualisiereAnsicht()">
@@ -172,7 +427,7 @@
                     <input type="password" id="backupPasswort" placeholder="Sicheres Passwort wählen..." required>
                 </div>
                 <button type="button" class="btn-export" onclick="exportDaten()">⬇️ Exportieren</button>
-                
+
                 <div class="file-input-wrapper">
                     <button type="button" class="btn-import">⬆️ Importieren (Merge)</button>
                     <input type="file" id="importFile" accept=".json,.enc" onchange="importDaten(event)">
@@ -202,34 +457,34 @@
             currentTargetField = fieldId;
             document.getElementById('mapModal').style.display = 'flex';
             if (!pickerMap) {
-                pickerMap = L.map('mapView').setView([51.165, 10.451], 6); 
+                pickerMap = L.map('mapView').setView([51.165, 10.451], 6);
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OSM' }).addTo(pickerMap);
-                pickerMap.on('click', async function(e) {
+                pickerMap.on('click', async function (e) {
                     const { lat, lng } = e.latlng;
                     if (pickerMarker) pickerMap.removeLayer(pickerMarker);
                     pickerMarker = L.marker([lat, lng]).addTo(pickerMap);
                     try {
                         const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1`);
                         const data = await res.json();
-                        if(data && data.address) {
+                        if (data && data.address) {
                             let addr = "";
                             const a = data.address;
-                            if(a.road) addr += a.road + " ";
-                            if(a.house_number) addr += a.house_number + ", ";
-                            if(a.postcode) addr += a.postcode + " ";
-                            if(a.city || a.town || a.village) addr += (a.city || a.town || a.village);
+                            if (a.road) addr += a.road + " ";
+                            if (a.house_number) addr += a.house_number + ", ";
+                            if (a.postcode) addr += a.postcode + " ";
+                            if (a.city || a.town || a.village) addr += (a.city || a.town || a.village);
                             document.getElementById(currentTargetField).value = addr.trim() || data.display_name;
                             closeMapPicker();
                         }
                     } catch (err) { alert("Adress-Suche fehlgeschlagen."); }
                 });
             }
-            setTimeout(() => { pickerMap.invalidateSize(); pickerMap.locate({setView: true, maxZoom: 14}); }, 100);
+            setTimeout(() => { pickerMap.invalidateSize(); pickerMap.locate({ setView: true, maxZoom: 14 }); }, 100);
         }
         function closeMapPicker() { document.getElementById('mapModal').style.display = 'none'; }
 
         // --- INITIALISIERUNG ---
-        window.onload = function() {
+        window.onload = function () {
             ladeDaten();
             ladeEinstellungen();
             document.getElementById('filterVon').value = getErsterTagDesMonats();
@@ -242,9 +497,9 @@
         function speichereDaten() { localStorage.setItem(STORAGE_KEY, JSON.stringify(fahrten)); }
         function ladeEinstellungen() {
             const s = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}');
-            if(s.apiAuswahl) document.getElementById('apiAuswahl').value = s.apiAuswahl;
-            if(s.apiKey) document.getElementById('apiKey').value = s.apiKey;
-            if(s.kmPreis) document.getElementById('kmPreis').value = s.kmPreis;
+            if (s.apiAuswahl) document.getElementById('apiAuswahl').value = s.apiAuswahl;
+            if (s.apiKey) document.getElementById('apiKey').value = s.apiKey;
+            if (s.kmPreis) document.getElementById('kmPreis').value = s.kmPreis;
         }
         function speichereEinstellungen() {
             localStorage.setItem(SETTINGS_KEY, JSON.stringify({
@@ -263,7 +518,7 @@
 
         async function berechneRoute() {
             const s = document.getElementById('start').value, z = document.getElementById('ziel').value, m = document.getElementById('apiAuswahl').value;
-            if(!s || !z) return alert("Start/Ziel fehlen!");
+            if (!s || !z) return alert("Start/Ziel fehlen!");
             const btn = document.getElementById('btnBerechnen'), st = document.getElementById('calcStatus');
             btn.disabled = true; st.classList.remove('hidden');
             try {
@@ -275,22 +530,22 @@
                     d = r.routes[0].distance / 1000;
                 } else if (m === 'google') {
                     const key = document.getElementById('apiKey').value;
-                    if(!window.google) await new Promise((res, rej) => {
+                    if (!window.google) await new Promise((res, rej) => {
                         const sc = document.createElement('script'); sc.src = `https://maps.googleapis.com/maps/api/js?key=${key}`;
                         sc.onload = res; sc.onerror = rej; document.head.appendChild(sc);
                     });
-                    const res = await new Promise((res, rej) => new google.maps.DistanceMatrixService().getDistanceMatrix({origins:[s],destinations:[z],travelMode:'DRIVING'}, (r,st) => st=='OK'?res(r):rej(st)));
+                    const res = await new Promise((res, rej) => new google.maps.DistanceMatrixService().getDistanceMatrix({ origins: [s], destinations: [z], travelMode: 'DRIVING' }, (r, st) => st == 'OK' ? res(r) : rej(st)));
                     d = res.rows[0].elements[0].distance.value / 1000;
                 }
                 document.getElementById('distanz').value = d.toFixed(1);
             } catch (e) { alert("Fehler: " + e); } finally { btn.disabled = false; st.classList.add('hidden'); }
         }
 
-        function formatLocalDatum(d) { return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
-        function getLetztesDatum() { if(!fahrten.length) return getHeute(); return formatLocalDatum(new Date(Math.max(...fahrten.map(f=>new Date(f.datum))))); }
+        function formatLocalDatum(d) { return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; }
+        function getLetztesDatum() { if (!fahrten.length) return getHeute(); return formatLocalDatum(new Date(Math.max(...fahrten.map(f => new Date(f.datum))))); }
         function getHeute() { return formatLocalDatum(new Date()); }
         function getErsterTagDesMonats() { const d = new Date(); return formatLocalDatum(new Date(d.getFullYear(), d.getMonth(), 1)); }
-        function getLetzterTagDesMonats() { const d = new Date(); return formatLocalDatum(new Date(d.getFullYear(), d.getMonth()+1, 0)); }
+        function getLetzterTagDesMonats() { const d = new Date(); return formatLocalDatum(new Date(d.getFullYear(), d.getMonth() + 1, 0)); }
 
         function aktualisiereAnsicht() {
             speichereEinstellungen();
@@ -304,19 +559,19 @@
                 if (cS && !fahrt.start.toLowerCase().includes(cS)) return false;
                 if (cZ && !fahrt.ziel.toLowerCase().includes(cZ)) return false;
                 return true;
-            }).sort((x,y) => new Date(y.datum) - new Date(x.datum));
+            }).sort((x, y) => new Date(y.datum) - new Date(x.datum));
 
             const tb = document.getElementById('tabelleBody'); tb.innerHTML = '';
             let sD = 0, sK = 0;
             f.forEach(fahrt => {
                 const k = fahrt.distanz * p;
                 const tr = document.createElement('tr');
-                tr.innerHTML = `<td>${new Date(fahrt.datum).toLocaleDateString('de-DE')}</td><td>${fahrt.start}</td><td>${fahrt.ziel}</td><td>${fahrt.distanz.toFixed(1).replace('.',',')} km</td><td>${k.toFixed(2).replace('.',',')} €</td><td class="action-btns"><button type="button" class="copy-btn" onclick="dupliziereFahrt(${fahrt.id})">Kopieren</button><button type="button" class="delete-btn" onclick="loescheFahrt(${fahrt.id})">Löschen</button></td>`;
+                tr.innerHTML = `<td>${new Date(fahrt.datum).toLocaleDateString('de-DE')}</td><td>${fahrt.start}</td><td>${fahrt.ziel}</td><td>${fahrt.distanz.toFixed(1).replace('.', ',')} km</td><td>${k.toFixed(2).replace('.', ',')} €</td><td class="action-btns"><button type="button" class="copy-btn" onclick="dupliziereFahrt(${fahrt.id})">Kopieren</button><button type="button" class="delete-btn" onclick="loescheFahrt(${fahrt.id})">Löschen</button></td>`;
                 tb.appendChild(tr); sD += fahrt.distanz; sK += k;
             });
             document.getElementById('infoAnzahl').innerText = f.length;
-            document.getElementById('infoDistanz').innerText = sD.toFixed(1).replace('.',',') + ' km';
-            document.getElementById('infoKosten').innerText = sK.toFixed(2).replace('.',',') + ' €';
+            document.getElementById('infoDistanz').innerText = sD.toFixed(1).replace('.', ',') + ' km';
+            document.getElementById('infoKosten').innerText = sK.toFixed(2).replace('.', ',') + ' €';
             document.getElementById('datum').value = getLetztesDatum();
         }
 
@@ -333,20 +588,20 @@
             }
         }
 
-        document.getElementById('fahrtForm').addEventListener('submit', function(e) {
+        document.getElementById('fahrtForm').addEventListener('submit', function (e) {
             e.preventDefault();
-            fahrten.push({ id: Date.now(), datum: document.getElementById('datum').value, start: document.getElementById('start').value, ziel: document.getElementById('ziel').value, distanz: parseFloat(document.getElementById('distanz').value.replace(',','.')) });
+            fahrten.push({ id: Date.now(), datum: document.getElementById('datum').value, start: document.getElementById('start').value, ziel: document.getElementById('ziel').value, distanz: parseFloat(document.getElementById('distanz').value.replace(',', '.')) });
             speichereDaten();
-            ['distanz','start','ziel'].forEach(id => document.getElementById(id).value = '');
+            ['distanz', 'start', 'ziel'].forEach(id => document.getElementById(id).value = '');
             ['colFilterDatum', 'colFilterStart', 'colFilterZiel'].forEach(id => document.getElementById(id).value = '');
             aktualisiereAnsicht();
         });
 
-        function loescheFahrt(id) { if(confirm("Möchtest du diese Fahrt wirklich löschen?")) { fahrten = fahrten.filter(f => f.id !== id); speichereDaten(); aktualisiereAnsicht(); } }
+        function loescheFahrt(id) { if (confirm("Möchtest du diese Fahrt wirklich löschen?")) { fahrten = fahrten.filter(f => f.id !== id); speichereDaten(); aktualisiereAnsicht(); } }
         ['filterVon', 'filterBis'].forEach(id => document.getElementById(id).addEventListener('change', aktualisiereAnsicht));
 
         // --- NEU: CRYPTO & BACKUP FUNKTIONEN ---
-        
+
         // Hilfsfunktionen für Base64 Konvertierung
         function bufferToBase64(buf) {
             let binary = ''; const bytes = new Uint8Array(buf);
@@ -405,7 +660,7 @@
                 a.click();
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url);
-                
+
             } catch (e) {
                 alert("Fehler beim Exportieren: " + e.message);
             }
@@ -416,12 +671,12 @@
             const passwort = document.getElementById('backupPasswort').value;
             const file = event.target.files[0];
             event.target.value = ''; // Input resetten
-            
+
             if (!file) return;
             if (!passwort) return alert("Bitte gib erst das Passwort ein, mit dem die Datei verschlüsselt wurde!");
 
             const reader = new FileReader();
-            reader.onload = async function(e) {
+            reader.onload = async function (e) {
                 try {
                     const importObj = JSON.parse(e.target.result);
                     if (!importObj.salt || !importObj.iv || !importObj.data) throw new Error("Ungültiges Dateiformat.");
@@ -431,7 +686,7 @@
                     const encryptedData = base64ToBuffer(importObj.data);
 
                     const key = await getCryptoKey(passwort, salt);
-                    
+
                     let decryptedContent;
                     try {
                         decryptedContent = await crypto.subtle.decrypt(
@@ -448,14 +703,21 @@
                     // --- MERGE LOGIK ---
                     let hinzugefuegt = 0;
                     importierteFahrten.forEach(importFahrt => {
-                        // Prüfen, ob eine Fahrt mit dieser ID bereits existiert
-                        const existiert = fahrten.some(f => f.id === importFahrt.id);
+
+                        // Wir prüfen nun auf den inhaltlichen "Fingerabdruck" der Fahrt:
+                        // Gleiches Datum + Gleicher Start + Gleiches Ziel
+                        const existiert = fahrten.some(f =>
+                            f.datum === importFahrt.datum &&
+                            f.start.toLowerCase().trim() === importFahrt.start.toLowerCase().trim() &&
+                            f.ziel.toLowerCase().trim() === importFahrt.ziel.toLowerCase().trim()
+                        );
+
                         if (!existiert) {
                             fahrten.push(importFahrt);
                             hinzugefuegt++;
                         }
                     });
-
+                    
                     speichereDaten();
                     aktualisiereAnsicht();
                     alert(`Import erfolgreich!\nEs wurden ${hinzugefuegt} neue Fahrten hinzugefügt.\nBereits vorhandene Fahrten wurden nicht überschrieben.`);
@@ -468,4 +730,5 @@
         }
     </script>
 </body>
+
 </html>
