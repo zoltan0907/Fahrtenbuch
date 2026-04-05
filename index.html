@@ -162,7 +162,11 @@
         .btn-share {
             background-color: #3498db;
             width: 100%;
-            margin-top: 15px;
+            margin-top: 0;
+        }
+
+        .btn-share:hover {
+            background-color: #2980b9;
         }
 
         .btn-export {
@@ -614,8 +618,16 @@
                     <label>€ / km:</label><input type="number" step="0.01" id="kmPreis" value="0.30"
                         onchange="aktualisiereAnsicht()">
                 </div>
-                <button type="button" class="btn-share" onclick="teileFahrtenPerMail()">✉️ Aktuelle Liste
-                    teilen</button>
+
+                <div style="display: flex; gap: 5px; margin-top: 15px;">
+                    <select id="shareFormat"
+                        style="padding: 10px; border: 1px solid #ccc; border-radius: 4px; background: white; font-weight: bold; color: #2c3e50;">
+                        <option value="text">TXT</option>
+                        <option value="csv">CSV</option>
+                    </select>
+                    <button type="button" class="btn-share" style="flex-grow: 1;" onclick="teileFahrtenPerMail()">✉️
+                        Teilen</button>
+                </div>
             </div>
 
             <div class="box">
@@ -739,7 +751,6 @@
         function getErsterTagDesMonats() { const d = new Date(); return formatLocalDatum(new Date(d.getFullYear(), d.getMonth(), 1)); }
         function getLetzterTagDesMonats() { const d = new Date(); return formatLocalDatum(new Date(d.getFullYear(), d.getMonth() + 1, 0)); }
 
-        // --- FILTER ZURÜCKSETZEN ---
         function filterZuruecksetzen() {
             if (fahrten.length > 0) {
                 document.getElementById('filterVon').value = getErstesDatum();
@@ -837,17 +848,40 @@
             document.getElementById('datum').value = getLetztesDatum();
         }
 
-        // --- AKTIONEN ---
+        // --- AKTIONEN (mit TXT/CSV Logik) ---
         function teileFahrtenPerMail() {
             if (aktuellGefilterteFahrten.length === 0) return alert("Nichts zu teilen.");
-            let text = "Hier ist der Auszug:\n\n--- ZUSAMMENFASSUNG ---\n";
-            text += `Anzahl: ${document.getElementById('infoAnzahl').innerText}\nDistanz:  ${document.getElementById('infoDistanz').innerText}\nKosten:   ${document.getElementById('infoKosten').innerText}\n\n--- FAHRTEN ---\n`;
-            aktuellGefilterteFahrten.forEach(f => {
-                text += `${new Date(f.datum).toLocaleDateString('de-DE')} | ${f.start} -> ${f.ziel}\n`;
-                if (f.notizen) text += `Zweck: ${f.notizen}\n`;
-                text += `-> ${f.distanz.toFixed(1).replace('.', ',')} km\n\n`;
-            });
-            window.location.href = `mailto:?subject=${encodeURIComponent("Fahrtenbuch")}&body=${encodeURIComponent(text)}`;
+
+            const format = document.getElementById('shareFormat').value;
+            const preisProKm = parseFloat(document.getElementById('kmPreis').value) || 0.30;
+            let text = "";
+
+            if (format === 'csv') {
+                // Deutsches CSV-Format (Semikolon als Trenner, Komma für Dezimalzahlen)
+                text = "Datum;Start;Ziel;Notizen;Distanz (km);Kosten (Euro)\n";
+                aktuellGefilterteFahrten.forEach(f => {
+                    const deDatum = new Date(f.datum).toLocaleDateString('de-DE');
+                    // Anführungszeichen setzen und vorhandene Anführungszeichen maskieren
+                    const start = `"${(f.start || '').replace(/"/g, '""')}"`;
+                    const ziel = `"${(f.ziel || '').replace(/"/g, '""')}"`;
+                    const notizen = `"${(f.notizen || '').replace(/"/g, '""')}"`;
+                    const distanz = f.distanz.toFixed(1).replace('.', ',');
+                    const kosten = (f.distanz * preisProKm).toFixed(2).replace('.', ',');
+
+                    text += `${deDatum};${start};${ziel};${notizen};${distanz};${kosten}\n`;
+                });
+            } else {
+                // Klassisches Text-Format
+                text = "Hier ist der Auszug:\n\n--- ZUSAMMENFASSUNG ---\n";
+                text += `Anzahl: ${document.getElementById('infoAnzahl').innerText}\nDistanz:  ${document.getElementById('infoDistanz').innerText}\nKosten:   ${document.getElementById('infoKosten').innerText}\n\n--- FAHRTEN ---\n`;
+                aktuellGefilterteFahrten.forEach(f => {
+                    text += `${new Date(f.datum).toLocaleDateString('de-DE')} | ${f.start} -> ${f.ziel}\n`;
+                    if (f.notizen) text += `Zweck: ${f.notizen}\n`;
+                    text += `-> ${f.distanz.toFixed(1).replace('.', ',')} km (Kosten: ${(f.distanz * preisProKm).toFixed(2).replace('.', ',')} €)\n\n`;
+                });
+            }
+
+            window.location.href = `mailto:?subject=${encodeURIComponent("Fahrtenbuch Auszug")}&body=${encodeURIComponent(text)}`;
         }
 
         function dupliziereFahrt(id) {
