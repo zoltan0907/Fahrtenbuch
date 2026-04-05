@@ -306,20 +306,34 @@
         }
 
         // --- HELPER FUNKTIONEN FÜR DATUM ---
+        function formatLocalDatum(dateObj) {
+            const jahr = dateObj.getFullYear();
+            const monat = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const tag = String(dateObj.getDate()).padStart(2, '0');
+            return `${jahr}-${monat}-${tag}`;
+        }
+
         function getLetztesDatum() {
             if (fahrten.length === 0) return getHeute();
             const daten = fahrten.map(f => new Date(f.datum));
             const maxDatum = new Date(Math.max.apply(null, daten));
-            return maxDatum.toISOString().split('T')[0];
+            return formatLocalDatum(maxDatum);
         }
-        function getHeute() { return new Date().toISOString().split('T')[0]; }
+
+        function getHeute() { 
+            return formatLocalDatum(new Date()); 
+        }
+
         function getErsterTagDesMonats() {
             const d = new Date();
-            return new Date(d.getFullYear(), d.getMonth(), 1).toISOString().split('T')[0];
+            const ersterTag = new Date(d.getFullYear(), d.getMonth(), 1);
+            return formatLocalDatum(ersterTag);
         }
+
         function getLetzterTagDesMonats() {
             const d = new Date();
-            return new Date(d.getFullYear(), d.getMonth() + 1, 0).toISOString().split('T')[0];
+            const letzterTag = new Date(d.getFullYear(), d.getMonth() + 1, 0);
+            return formatLocalDatum(letzterTag);
         }
 
         // --- TABELLE UND AUSWERTUNG ---
