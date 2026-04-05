@@ -193,7 +193,7 @@
             height: 100%;
         }
 
-        /* NEU: Filter-Leiste über der Tabelle */
+        /* Filter-Leiste über der Tabelle */
         .table-controls {
             display: flex;
             gap: 15px;
@@ -403,7 +403,6 @@
                 margin-top: 5px;
             }
 
-            /* Smartphone: Filterleiste */
             .table-controls {
                 flex-direction: column;
                 align-items: stretch;
@@ -457,6 +456,7 @@
                 border-radius: 8px;
                 padding: 10px 15px;
                 background: #fff;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
             }
 
             td {
@@ -735,14 +735,19 @@
 
         function formatLocalDatum(d) { return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; }
         function getLetztesDatum() { if (!fahrten.length) return formatLocalDatum(new Date()); return formatLocalDatum(new Date(Math.max(...fahrten.map(f => new Date(f.datum))))); }
+        function getErstesDatum() { if (!fahrten.length) return formatLocalDatum(new Date()); return formatLocalDatum(new Date(Math.min(...fahrten.map(f => new Date(f.datum))))); }
         function getErsterTagDesMonats() { const d = new Date(); return formatLocalDatum(new Date(d.getFullYear(), d.getMonth(), 1)); }
         function getLetzterTagDesMonats() { const d = new Date(); return formatLocalDatum(new Date(d.getFullYear(), d.getMonth() + 1, 0)); }
 
-        // --- NEU: Filter zurücksetzen ---
+        // --- FILTER ZURÜCKSETZEN ---
         function filterZuruecksetzen() {
-            document.getElementById('filterVon').value = '';
-            document.getElementById('filterBis').value = '';
-            // Auch Spaltenfilter leeren (optional, aber nutzerfreundlich)
+            if (fahrten.length > 0) {
+                document.getElementById('filterVon').value = getErstesDatum();
+                document.getElementById('filterBis').value = getLetztesDatum();
+            } else {
+                document.getElementById('filterVon').value = '';
+                document.getElementById('filterBis').value = '';
+            }
             ['colFilterDatum', 'colFilterStart', 'colFilterZiel', 'colFilterNotizen'].forEach(id => document.getElementById(id).value = '');
             aktualisiereAnsicht();
         }
@@ -829,7 +834,6 @@
             document.getElementById('infoDistanz').innerText = sD.toFixed(1).replace('.', ',') + ' km';
             document.getElementById('infoKosten').innerText = sK.toFixed(2).replace('.', ',') + ' €';
 
-            // Datumfeld für die nächste Fahrt aktualisieren, falls noch leer oder nach Duplizieren
             document.getElementById('datum').value = getLetztesDatum();
         }
 
@@ -862,11 +866,9 @@
             await speichereDaten();
             ['distanz', 'start', 'ziel', 'notizen'].forEach(k => document.getElementById(k).value = '');
 
-            // UX Check: Liegt die neue Fahrt im aktuellen Filter? Falls nicht, Filter anpassen oder warnen.
             const filterV = document.getElementById('filterVon').value;
             const filterB = document.getElementById('filterBis').value;
             if ((filterV && fahrtDatum < filterV) || (filterB && fahrtDatum > filterB)) {
-                // Fahrt würde verschwinden -> Wir setzen die Filter zurück, damit der Nutzer seine Fahrt sieht!
                 filterZuruecksetzen();
             } else {
                 aktualisiereAnsicht();
