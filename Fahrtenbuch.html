@@ -13,14 +13,12 @@
         h1 { text-align: center; color: #2c3e50; }
         .container { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 1fr 320px; gap: 20px; }
         
-        /* Sidebar & Boxen */
         .sidebar { display: flex; flex-direction: column; gap: 20px; position: sticky; top: 20px; }
         .box { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .box h3 { margin-top: 0; border-bottom: 2px solid #3498db; padding-bottom: 10px; font-size: 18px; }
         .info-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 15px; }
         .info-row strong { color: #2980b9; }
         
-        /* Formulare */
         .form-group { display: flex; flex-direction: column; margin-bottom: 12px;}
         label { margin-bottom: 5px; font-size: 13px; font-weight: bold; color: #555; }
         input, select { padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; width: 100%; box-sizing: border-box; }
@@ -31,7 +29,6 @@
         .main-content { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
         
-        /* Buttons */
         button { background-color: #27ae60; color: white; border: none; padding: 12px; border-radius: 4px; font-size: 15px; cursor: pointer; transition: background 0.3s; font-weight: bold; }
         button:hover { background-color: #2ecc71; }
         .btn-submit { grid-column: span 2; margin-top: 10px;}
@@ -39,13 +36,19 @@
         .btn-calc:hover { background-color: #f1c40f; }
         .btn-calc:disabled { background-color: #bdc3c7; cursor: not-allowed; }
         
-        /* Tabelle & Spaltenfilter */
+        /* Backup Buttons */
+        .btn-export { background-color: #8e44ad; width: 100%; margin-bottom: 10px; }
+        .btn-export:hover { background-color: #9b59b6; }
+        .btn-import { background-color: #2c3e50; width: 100%; }
+        .btn-import:hover { background-color: #34495e; }
+        .file-input-wrapper { position: relative; overflow: hidden; display: inline-block; width: 100%; }
+        .file-input-wrapper input[type=file] { font-size: 100px; position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; height: 100%; }
+        
         table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 13px; }
         th, td { padding: 10px 8px; text-align: left; border-bottom: 1px solid #ddd; vertical-align: top; }
         th { background-color: #f8f9fa; color: #2c3e50; }
         
         .col-filter { width: 100%; padding: 5px; font-size: 11px; margin-top: 5px; border: 1px solid #bdc3c7; border-radius: 3px; font-weight: normal; }
-        
         .action-btns { display: flex; gap: 5px; flex-wrap: wrap; }
         .delete-btn { background-color: #e74c3c; padding: 6px 10px; font-size: 11px; border-radius: 3px; }
         .delete-btn:hover { background-color: #c0392b; }
@@ -55,7 +58,6 @@
         .hidden { display: none !important; }
         .loading { font-size: 12px; color: #e67e22; margin-top: 5px; font-weight: bold; }
 
-        /* Map Modal */
         .map-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center; }
         .map-container { background: white; width: 95%; max-width: 600px; height: 70vh; border-radius: 8px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
         .map-header { padding: 15px; background: #2c3e50; color: white; display: flex; justify-content: space-between; align-items: center; font-weight: bold; }
@@ -112,7 +114,7 @@
             <table id="fahrtenTabelle">
                 <thead>
                     <tr>
-                        <th>Datum<br><input type="text" id="colFilterDatum" class="col-filter" placeholder="z.B. 2024 oder .05." onkeyup="aktualisiereAnsicht()"></th>
+                        <th>Datum<br><input type="text" id="colFilterDatum" class="col-filter" placeholder="Suchen..." onkeyup="aktualisiereAnsicht()"></th>
                         <th>Start<br><input type="text" id="colFilterStart" class="col-filter" placeholder="Suchen..." onkeyup="aktualisiereAnsicht()"></th>
                         <th>Ziel<br><input type="text" id="colFilterZiel" class="col-filter" placeholder="Suchen..." onkeyup="aktualisiereAnsicht()"></th>
                         <th>Distanz</th>
@@ -142,7 +144,7 @@
             </div>
 
             <div class="box">
-                <h3>📊 Globale Auswertung</h3>
+                <h3>📊 Auswertung</h3>
                 <div class="form-group">
                     <label for="filterVon">Von:</label>
                     <input type="date" id="filterVon">
@@ -159,6 +161,21 @@
                 <div class="form-group" style="margin-top: 15px; border-top: 1px solid #eee; padding-top: 10px;">
                     <label for="kmPreis">Preis pro km (€):</label>
                     <input type="number" step="0.01" id="kmPreis" value="0.30" onchange="aktualisiereAnsicht()">
+                </div>
+            </div>
+
+            <div class="box">
+                <h3>💾 Backup & Sync</h3>
+                <p style="font-size: 12px; color: #7f8c8d; margin-top: 0;">Sichere AES-256-GCM Verschlüsselung</p>
+                <div class="form-group">
+                    <label for="backupPasswort">Backup-Passwort:</label>
+                    <input type="password" id="backupPasswort" placeholder="Sicheres Passwort wählen..." required>
+                </div>
+                <button type="button" class="btn-export" onclick="exportDaten()">⬇️ Exportieren</button>
+                
+                <div class="file-input-wrapper">
+                    <button type="button" class="btn-import">⬆️ Importieren (Merge)</button>
+                    <input type="file" id="importFile" accept=".json,.enc" onchange="importDaten(event)">
                 </div>
             </div>
         </div>
@@ -277,57 +294,26 @@
 
         function aktualisiereAnsicht() {
             speichereEinstellungen();
-            
-            // Sidebar-Filter (Zeitraum)
-            const v = document.getElementById('filterVon').value;
-            const b = document.getElementById('filterBis').value;
-            const p = parseFloat(document.getElementById('kmPreis').value) || 0.30;
-            
-            // Spalten-Filter (Text)
-            const colDatum = document.getElementById('colFilterDatum').value.toLowerCase();
-            const colStart = document.getElementById('colFilterStart').value.toLowerCase();
-            const colZiel = document.getElementById('colFilterZiel').value.toLowerCase();
+            const v = document.getElementById('filterVon').value, b = document.getElementById('filterBis').value, p = parseFloat(document.getElementById('kmPreis').value) || 0.30;
+            const cD = document.getElementById('colFilterDatum').value.toLowerCase(), cS = document.getElementById('colFilterStart').value.toLowerCase(), cZ = document.getElementById('colFilterZiel').value.toLowerCase();
 
-            // Filtern
             let f = fahrten.filter(fahrt => {
-                // 1. Zeitfenster-Filter prüfen
                 if (v && fahrt.datum < v) return false;
                 if (b && fahrt.datum > b) return false;
-
-                // 2. Spalten-Filter prüfen
-                const deDatum = new Date(fahrt.datum).toLocaleDateString('de-DE').toLowerCase();
-                if (colDatum && !deDatum.includes(colDatum)) return false;
-                if (colStart && !fahrt.start.toLowerCase().includes(colStart)) return false;
-                if (colZiel && !fahrt.ziel.toLowerCase().includes(colZiel)) return false;
-
+                if (cD && !new Date(fahrt.datum).toLocaleDateString('de-DE').toLowerCase().includes(cD)) return false;
+                if (cS && !fahrt.start.toLowerCase().includes(cS)) return false;
+                if (cZ && !fahrt.ziel.toLowerCase().includes(cZ)) return false;
                 return true;
             }).sort((x,y) => new Date(y.datum) - new Date(x.datum));
 
-            // Tabelle aufbauen
-            const tb = document.getElementById('tabelleBody'); 
-            tb.innerHTML = '';
+            const tb = document.getElementById('tabelleBody'); tb.innerHTML = '';
             let sD = 0, sK = 0;
-            
             f.forEach(fahrt => {
                 const k = fahrt.distanz * p;
                 const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${new Date(fahrt.datum).toLocaleDateString('de-DE')}</td>
-                    <td>${fahrt.start}</td>
-                    <td>${fahrt.ziel}</td>
-                    <td>${fahrt.distanz.toFixed(1).replace('.',',')} km</td>
-                    <td>${k.toFixed(2).replace('.',',')} €</td>
-                    <td class="action-btns">
-                        <button type="button" class="copy-btn" onclick="dupliziereFahrt(${fahrt.id})">Kopieren</button>
-                        <button type="button" class="delete-btn" onclick="loescheFahrt(${fahrt.id})">Löschen</button>
-                    </td>
-                `;
-                tb.appendChild(tr); 
-                sD += fahrt.distanz; 
-                sK += k;
+                tr.innerHTML = `<td>${new Date(fahrt.datum).toLocaleDateString('de-DE')}</td><td>${fahrt.start}</td><td>${fahrt.ziel}</td><td>${fahrt.distanz.toFixed(1).replace('.',',')} km</td><td>${k.toFixed(2).replace('.',',')} €</td><td class="action-btns"><button type="button" class="copy-btn" onclick="dupliziereFahrt(${fahrt.id})">Kopieren</button><button type="button" class="delete-btn" onclick="loescheFahrt(${fahrt.id})">Löschen</button></td>`;
+                tb.appendChild(tr); sD += fahrt.distanz; sK += k;
             });
-
-            // Auswertung rechts aktualisieren (Reagiert jetzt auch auf die Spaltenfilter!)
             document.getElementById('infoAnzahl').innerText = f.length;
             document.getElementById('infoDistanz').innerText = sD.toFixed(1).replace('.',',') + ' km';
             document.getElementById('infoKosten').innerText = sK.toFixed(2).replace('.',',') + ' €';
@@ -349,31 +335,137 @@
 
         document.getElementById('fahrtForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            fahrten.push({ 
-                id: Date.now(), 
-                datum: document.getElementById('datum').value, 
-                start: document.getElementById('start').value, 
-                ziel: document.getElementById('ziel').value, 
-                distanz: parseFloat(document.getElementById('distanz').value.replace(',','.')) 
-            });
+            fahrten.push({ id: Date.now(), datum: document.getElementById('datum').value, start: document.getElementById('start').value, ziel: document.getElementById('ziel').value, distanz: parseFloat(document.getElementById('distanz').value.replace(',','.')) });
             speichereDaten();
             ['distanz','start','ziel'].forEach(id => document.getElementById(id).value = '');
-            
-            // Spaltenfilter nach neuem Eintrag zurücksetzen, falls welche aktiv waren
             ['colFilterDatum', 'colFilterStart', 'colFilterZiel'].forEach(id => document.getElementById(id).value = '');
-            
             aktualisiereAnsicht();
         });
 
-        function loescheFahrt(id) { 
-            if(confirm("Möchtest du diese Fahrt wirklich löschen?")) { 
-                fahrten = fahrten.filter(f => f.id !== id); 
-                speichereDaten(); 
-                aktualisiereAnsicht(); 
-            } 
+        function loescheFahrt(id) { if(confirm("Möchtest du diese Fahrt wirklich löschen?")) { fahrten = fahrten.filter(f => f.id !== id); speichereDaten(); aktualisiereAnsicht(); } }
+        ['filterVon', 'filterBis'].forEach(id => document.getElementById(id).addEventListener('change', aktualisiereAnsicht));
+
+        // --- NEU: CRYPTO & BACKUP FUNKTIONEN ---
+        
+        // Hilfsfunktionen für Base64 Konvertierung
+        function bufferToBase64(buf) {
+            let binary = ''; const bytes = new Uint8Array(buf);
+            for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i]);
+            return window.btoa(binary);
+        }
+        function base64ToBuffer(b64) {
+            const binary = window.atob(b64); const bytes = new Uint8Array(binary.length);
+            for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+            return bytes.buffer;
         }
 
-        ['filterVon', 'filterBis'].forEach(id => document.getElementById(id).addEventListener('change', aktualisiereAnsicht));
+        // Schlüsselableitung PBKDF2
+        async function getCryptoKey(passwort, salt) {
+            const encoder = new TextEncoder();
+            const keyMaterial = await crypto.subtle.importKey(
+                "raw", encoder.encode(passwort), { name: "PBKDF2" }, false, ["deriveKey"]
+            );
+            return await crypto.subtle.deriveKey(
+                { name: "PBKDF2", salt: salt, iterations: 100000, hash: "SHA-256" },
+                keyMaterial, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]
+            );
+        }
+
+        // Export (Verschlüsseln)
+        async function exportDaten() {
+            const passwort = document.getElementById('backupPasswort').value;
+            if (!passwort) return alert("Bitte gib ein Passwort für das Backup ein!");
+            if (fahrten.length === 0) return alert("Keine Fahrten zum Exportieren vorhanden.");
+
+            try {
+                const datenString = JSON.stringify(fahrten);
+                const encoder = new TextEncoder();
+                const datenBytes = encoder.encode(datenString);
+
+                const salt = crypto.getRandomValues(new Uint8Array(16));
+                const iv = crypto.getRandomValues(new Uint8Array(12));
+                const key = await getCryptoKey(passwort, salt);
+
+                const encryptedContent = await crypto.subtle.encrypt(
+                    { name: "AES-GCM", iv: iv }, key, datenBytes
+                );
+
+                const exportObj = {
+                    salt: bufferToBase64(salt),
+                    iv: bufferToBase64(iv),
+                    data: bufferToBase64(encryptedContent)
+                };
+
+                const blob = new Blob([JSON.stringify(exportObj)], { type: "application/json" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = `Fahrtenbuch_Backup_${getHeute()}.enc`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+            } catch (e) {
+                alert("Fehler beim Exportieren: " + e.message);
+            }
+        }
+
+        // Import (Entschlüsseln & Mergen)
+        async function importDaten(event) {
+            const passwort = document.getElementById('backupPasswort').value;
+            const file = event.target.files[0];
+            event.target.value = ''; // Input resetten
+            
+            if (!file) return;
+            if (!passwort) return alert("Bitte gib erst das Passwort ein, mit dem die Datei verschlüsselt wurde!");
+
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                try {
+                    const importObj = JSON.parse(e.target.result);
+                    if (!importObj.salt || !importObj.iv || !importObj.data) throw new Error("Ungültiges Dateiformat.");
+
+                    const salt = base64ToBuffer(importObj.salt);
+                    const iv = base64ToBuffer(importObj.iv);
+                    const encryptedData = base64ToBuffer(importObj.data);
+
+                    const key = await getCryptoKey(passwort, salt);
+                    
+                    let decryptedContent;
+                    try {
+                        decryptedContent = await crypto.subtle.decrypt(
+                            { name: "AES-GCM", iv: iv }, key, encryptedData
+                        );
+                    } catch (decryptErr) {
+                        throw new Error("Falsches Passwort oder beschädigte Datei.");
+                    }
+
+                    const decoder = new TextDecoder();
+                    const datenString = decoder.decode(decryptedContent);
+                    const importierteFahrten = JSON.parse(datenString);
+
+                    // --- MERGE LOGIK ---
+                    let hinzugefuegt = 0;
+                    importierteFahrten.forEach(importFahrt => {
+                        // Prüfen, ob eine Fahrt mit dieser ID bereits existiert
+                        const existiert = fahrten.some(f => f.id === importFahrt.id);
+                        if (!existiert) {
+                            fahrten.push(importFahrt);
+                            hinzugefuegt++;
+                        }
+                    });
+
+                    speichereDaten();
+                    aktualisiereAnsicht();
+                    alert(`Import erfolgreich!\nEs wurden ${hinzugefuegt} neue Fahrten hinzugefügt.\nBereits vorhandene Fahrten wurden nicht überschrieben.`);
+
+                } catch (err) {
+                    alert("Import fehlgeschlagen:\n" + err.message);
+                }
+            };
+            reader.readAsText(file);
+        }
     </script>
 </body>
 </html>
