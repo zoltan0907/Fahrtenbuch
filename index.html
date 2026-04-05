@@ -158,6 +158,7 @@
             grid-column: span 2;
         }
 
+        /* Sidebar Buttons */
         .btn-share {
             background-color: #3498db;
             width: 100%;
@@ -192,10 +193,53 @@
             height: 100%;
         }
 
+        /* NEU: Filter-Leiste über der Tabelle */
+        .table-controls {
+            display: flex;
+            gap: 15px;
+            align-items: flex-end;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            margin-top: 30px;
+            margin-bottom: 10px;
+        }
+
+        .table-filter-group {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .table-filter-group label {
+            margin-bottom: 5px;
+            font-size: 13px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .btn-reset {
+            background-color: #95a5a6;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            height: 42px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .btn-reset:hover {
+            background-color: #7f8c8d;
+        }
+
+        /* Tabelle */
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
+            margin-top: 10px;
             font-size: 13px;
             table-layout: fixed;
         }
@@ -256,6 +300,7 @@
             font-weight: bold;
         }
 
+        /* Map Modal */
         .map-modal {
             display: none;
             position: fixed;
@@ -286,9 +331,7 @@
             cursor: crosshair;
         }
 
-        /* ========================================================
-           LOGIN OVERLAY (Sperrbildschirm)
-           ======================================================== */
+        /* Login Overlay */
         #loginOverlay {
             position: fixed;
             top: 0;
@@ -332,9 +375,7 @@
             padding: 12px;
         }
 
-        /* ========================================================
-           SMARTPHONE OPTIMIERUNG
-           ======================================================== */
+        /* Smartphone Optimierung */
         @media (max-width: 768px) {
             body {
                 padding: 10px;
@@ -359,6 +400,17 @@
             .btn-submit,
             .btn-calc {
                 width: 100%;
+                margin-top: 5px;
+            }
+
+            /* Smartphone: Filterleiste */
+            .table-controls {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+            }
+
+            .btn-reset {
                 margin-top: 5px;
             }
 
@@ -504,17 +556,29 @@
                 </div>
             </form>
 
+            <div class="table-controls">
+                <div class="table-filter-group">
+                    <label>📅 Liste filtern von:</label>
+                    <input type="date" id="filterVon" onchange="aktualisiereAnsicht()">
+                </div>
+                <div class="table-filter-group">
+                    <label>bis:</label>
+                    <input type="date" id="filterBis" onchange="aktualisiereAnsicht()">
+                </div>
+                <button type="button" class="btn-reset" onclick="filterZuruecksetzen()">Alles anzeigen</button>
+            </div>
+
             <table id="fahrtenTabelle">
                 <thead>
                     <tr>
                         <th style="width: 85px;">Datum<br><input type="text" id="colFilterDatum" class="col-filter"
-                                placeholder="Filter..." onkeyup="aktualisiereAnsicht()"></th>
-                        <th>Start<br><input type="text" id="colFilterStart" class="col-filter" placeholder="Filter..."
+                                placeholder="Suchen..." onkeyup="aktualisiereAnsicht()"></th>
+                        <th>Start<br><input type="text" id="colFilterStart" class="col-filter" placeholder="Suchen..."
                                 onkeyup="aktualisiereAnsicht()"></th>
-                        <th>Ziel<br><input type="text" id="colFilterZiel" class="col-filter" placeholder="Filter..."
+                        <th>Ziel<br><input type="text" id="colFilterZiel" class="col-filter" placeholder="Suchen..."
                                 onkeyup="aktualisiereAnsicht()"></th>
                         <th>Notizen<br><input type="text" id="colFilterNotizen" class="col-filter"
-                                placeholder="Filter..." onkeyup="aktualisiereAnsicht()"></th>
+                                placeholder="Suchen..." onkeyup="aktualisiereAnsicht()"></th>
                         <th style="width: 60px;">km</th>
                         <th style="width: 65px;">Kosten</th>
                         <th style="width: 140px;">Aktionen</th>
@@ -542,9 +606,7 @@
             </div>
 
             <div class="box">
-                <h3>📊 Auswertung</h3>
-                <div class="form-group"><label>Von:</label><input type="date" id="filterVon"></div>
-                <div class="form-group"><label>Bis:</label><input type="date" id="filterBis"></div>
+                <h3>📊 Auswertung (Sichtbar)</h3>
                 <div class="info-row"><span>Fahrten:</span><strong id="infoAnzahl">0</strong></div>
                 <div class="info-row"><span>Distanz:</span><strong id="infoDistanz">0 km</strong></div>
                 <div class="info-row"><span>Kosten:</span><strong id="infoKosten">0 €</strong></div>
@@ -552,7 +614,7 @@
                     <label>€ / km:</label><input type="number" step="0.01" id="kmPreis" value="0.30"
                         onchange="aktualisiereAnsicht()">
                 </div>
-                <button type="button" class="btn-share" onclick="teileFahrtenPerMail()">✉️ Liste per E-Mail
+                <button type="button" class="btn-share" onclick="teileFahrtenPerMail()">✉️ Aktuelle Liste
                     teilen</button>
             </div>
 
@@ -587,7 +649,7 @@
 
         let fahrten = [];
         let aktuellGefilterteFahrten = [];
-        let inMemorySchluessel = null; // Hält den Schlüssel nur, solange der Tab offen ist!
+        let inMemorySchluessel = null;
 
         // --- BASIS KRYPTOGRAFIE ---
         function bufferToBase64(b) { return btoa(String.fromCharCode(...new Uint8Array(b))); }
@@ -600,14 +662,11 @@
 
         // --- ENTSPERREN LOGIK ---
         window.onload = () => {
-            // Prüfen, ob bereits verschlüsselte Daten existieren
             const gespeicherteDaten = localStorage.getItem(STORAGE_KEY);
             if (!gespeicherteDaten) {
                 document.getElementById('loginText').innerText = "Willkommen! Bitte wähle ein neues Master-Passwort für deine verschlüsselte Datenbank:";
                 document.getElementById('loginBtn').innerText = "Datenbank erstellen";
             }
-
-            // Enter-Taste im Passwort-Feld abfangen
             document.getElementById('masterPasswort').addEventListener('keypress', function (e) {
                 if (e.key === 'Enter') entsperreApp();
             });
@@ -623,7 +682,6 @@
                 let saltBuffer;
 
                 if (!saltStr) {
-                    // Ersteinrichtung: Neuen Salt generieren und speichern
                     saltBuffer = crypto.getRandomValues(new Uint8Array(16));
                     localStorage.setItem(SALT_KEY, bufferToBase64(saltBuffer));
                 } else {
@@ -631,31 +689,21 @@
                 }
 
                 inMemorySchluessel = await erstelleCryptoKey(pwd, saltBuffer);
-
                 const gespeicherteDaten = localStorage.getItem(STORAGE_KEY);
-                if (gespeicherteDaten) {
-                    // Entschlüsselungsversuch
-                    const obj = JSON.parse(gespeicherteDaten);
-                    const iv = base64ToBuffer(obj.iv);
-                    const encData = base64ToBuffer(obj.data);
 
+                if (gespeicherteDaten) {
+                    const obj = JSON.parse(gespeicherteDaten);
                     try {
-                        const dec = await crypto.subtle.decrypt({ name: "AES-GCM", iv: iv }, inMemorySchluessel, encData);
+                        const dec = await crypto.subtle.decrypt({ name: "AES-GCM", iv: base64ToBuffer(obj.iv) }, inMemorySchluessel, base64ToBuffer(obj.data));
                         fahrten = JSON.parse(new TextDecoder().decode(dec));
-                    } catch (decErr) {
-                        throw new Error("Falsches Passwort!");
-                    }
+                    } catch (decErr) { throw new Error("Falsches Passwort!"); }
                 } else {
-                    // Leere, neue Datenbank
                     fahrten = [];
-                    await speichereDaten(); // Initial einmal verschlüsselt speichern
+                    await speichereDaten();
                 }
 
-                // Erfolgreich! App anzeigen.
                 document.getElementById('loginOverlay').style.display = 'none';
-                document.getElementById('appContainer').style.display = 'grid';
-                if (window.innerWidth <= 768) document.getElementById('appContainer').style.display = 'flex'; // Mobile Fix
-
+                document.getElementById('appContainer').style.display = window.innerWidth <= 768 ? 'flex' : 'grid';
                 initialisiereApp();
 
             } catch (err) {
@@ -664,7 +712,7 @@
             }
         }
 
-        // --- APP INITIALISIERUNG (nach Entsperren) ---
+        // --- APP INITIALISIERUNG ---
         function initialisiereApp() {
             const s = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}');
             if (s.apiAuswahl) document.getElementById('apiAuswahl').value = s.apiAuswahl;
@@ -678,26 +726,26 @@
             toggleApiSettings();
         }
 
-        // --- DATEN VERSCHLÜSSELT SPEICHERN ---
         async function speichereDaten() {
             if (!inMemorySchluessel) return;
             const iv = crypto.getRandomValues(new Uint8Array(12));
-            const enc = await crypto.subtle.encrypt(
-                { name: "AES-GCM", iv: iv },
-                inMemorySchluessel,
-                new TextEncoder().encode(JSON.stringify(fahrten))
-            );
-            localStorage.setItem(STORAGE_KEY, JSON.stringify({
-                iv: bufferToBase64(iv),
-                data: bufferToBase64(enc)
-            }));
+            const enc = await crypto.subtle.encrypt({ name: "AES-GCM", iv: iv }, inMemorySchluessel, new TextEncoder().encode(JSON.stringify(fahrten)));
+            localStorage.setItem(STORAGE_KEY, JSON.stringify({ iv: bufferToBase64(iv), data: bufferToBase64(enc) }));
         }
 
-        // --- HELPERS ---
         function formatLocalDatum(d) { return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; }
         function getLetztesDatum() { if (!fahrten.length) return formatLocalDatum(new Date()); return formatLocalDatum(new Date(Math.max(...fahrten.map(f => new Date(f.datum))))); }
         function getErsterTagDesMonats() { const d = new Date(); return formatLocalDatum(new Date(d.getFullYear(), d.getMonth(), 1)); }
         function getLetzterTagDesMonats() { const d = new Date(); return formatLocalDatum(new Date(d.getFullYear(), d.getMonth() + 1, 0)); }
+
+        // --- NEU: Filter zurücksetzen ---
+        function filterZuruecksetzen() {
+            document.getElementById('filterVon').value = '';
+            document.getElementById('filterBis').value = '';
+            // Auch Spaltenfilter leeren (optional, aber nutzerfreundlich)
+            ['colFilterDatum', 'colFilterStart', 'colFilterZiel', 'colFilterNotizen'].forEach(id => document.getElementById(id).value = '');
+            aktualisiereAnsicht();
+        }
 
         // --- MAP PICKER ---
         let pickerMap = null, pickerMarker = null, currentTargetField = '';
@@ -780,6 +828,8 @@
             document.getElementById('infoAnzahl').innerText = aktuellGefilterteFahrten.length;
             document.getElementById('infoDistanz').innerText = sD.toFixed(1).replace('.', ',') + ' km';
             document.getElementById('infoKosten').innerText = sK.toFixed(2).replace('.', ',') + ' €';
+
+            // Datumfeld für die nächste Fahrt aktualisieren, falls noch leer oder nach Duplizieren
             document.getElementById('datum').value = getLetztesDatum();
         }
 
@@ -807,10 +857,20 @@
 
         document.getElementById('fahrtForm').onsubmit = async (e) => {
             e.preventDefault();
-            fahrten.push({ id: Date.now(), datum: document.getElementById('datum').value, start: document.getElementById('start').value, ziel: document.getElementById('ziel').value, distanz: parseFloat(document.getElementById('distanz').value.replace(',', '.')), notizen: document.getElementById('notizen').value });
+            const fahrtDatum = document.getElementById('datum').value;
+            fahrten.push({ id: Date.now(), datum: fahrtDatum, start: document.getElementById('start').value, ziel: document.getElementById('ziel').value, distanz: parseFloat(document.getElementById('distanz').value.replace(',', '.')), notizen: document.getElementById('notizen').value });
             await speichereDaten();
             ['distanz', 'start', 'ziel', 'notizen'].forEach(k => document.getElementById(k).value = '');
-            aktualisiereAnsicht();
+
+            // UX Check: Liegt die neue Fahrt im aktuellen Filter? Falls nicht, Filter anpassen oder warnen.
+            const filterV = document.getElementById('filterVon').value;
+            const filterB = document.getElementById('filterBis').value;
+            if ((filterV && fahrtDatum < filterV) || (filterB && fahrtDatum > filterB)) {
+                // Fahrt würde verschwinden -> Wir setzen die Filter zurück, damit der Nutzer seine Fahrt sieht!
+                filterZuruecksetzen();
+            } else {
+                aktualisiereAnsicht();
+            }
         };
 
         async function loescheFahrt(id) {
@@ -820,8 +880,6 @@
                 aktualisiereAnsicht();
             }
         }
-
-        ['filterVon', 'filterBis'].forEach(id => document.getElementById(id).onchange = aktualisiereAnsicht);
 
         // --- BACKUP (Dateiexport) ---
         async function exportDaten() {
