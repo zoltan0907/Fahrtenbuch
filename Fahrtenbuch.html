@@ -4,28 +4,31 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lokales Fahrtenbuch Pro</title>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; color: #333; }
         h1 { text-align: center; color: #2c3e50; }
         .container { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 1fr 320px; gap: 20px; }
         
-        /* Infobox & Einstellungen */
         .sidebar { display: flex; flex-direction: column; gap: 20px; position: sticky; top: 20px; }
         .box { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .box h3 { margin-top: 0; border-bottom: 2px solid #3498db; padding-bottom: 10px; font-size: 18px; }
-        
         .info-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 15px; }
         .info-row strong { color: #2980b9; }
         
-        /* Formulare */
         .form-group { display: flex; flex-direction: column; margin-bottom: 12px;}
         label { margin-bottom: 5px; font-size: 13px; font-weight: bold; color: #555; }
         input, select { padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; width: 100%; box-sizing: border-box; }
         
+        .input-with-btn { display: flex; gap: 5px; }
+        .btn-icon { width: auto; padding: 10px 15px; background-color: #34495e; }
+        
         .main-content { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
         
-        /* Buttons */
         button { background-color: #27ae60; color: white; border: none; padding: 12px; border-radius: 4px; font-size: 15px; cursor: pointer; transition: background 0.3s; font-weight: bold; }
         button:hover { background-color: #2ecc71; }
         .btn-submit { grid-column: span 2; margin-top: 10px;}
@@ -33,16 +36,21 @@
         .btn-calc:hover { background-color: #f1c40f; }
         .btn-calc:disabled { background-color: #bdc3c7; cursor: not-allowed; }
         
-        /* Tabelle */
         table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 14px; }
         th, td { padding: 12px 8px; text-align: left; border-bottom: 1px solid #ddd; }
         th { background-color: #f8f9fa; color: #2c3e50; }
         .delete-btn { background-color: #e74c3c; padding: 6px 10px; font-size: 12px; }
         .delete-btn:hover { background-color: #c0392b; }
 
-        /* Verstecken von Elementen */
         .hidden { display: none !important; }
         .loading { font-size: 12px; color: #e67e22; margin-top: 5px; font-weight: bold; }
+
+        /* Map Modal Styles */
+        .map-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center; }
+        .map-container { background: white; width: 95%; max-width: 600px; height: 70vh; border-radius: 8px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .map-header { padding: 15px; background: #2c3e50; color: white; display: flex; justify-content: space-between; align-items: center; font-weight: bold; }
+        .map-header button { background: #e74c3c; padding: 8px 15px; font-size: 13px; margin: 0; }
+        #mapView { flex-grow: 1; width: 100%; cursor: crosshair; }
 
         @media (max-width: 768px) {
             .container { grid-template-columns: 1fr; }
@@ -68,13 +76,21 @@
                         <label for="distanz">Distanz (km)</label>
                         <input type="number" step="0.1" id="distanz" placeholder="z.B. 25.5" required>
                     </div>
+                    
                     <div class="form-group">
                         <label for="start">Startadresse</label>
-                        <input type="text" id="start" placeholder="z.B. Musterstraße 1, Berlin" required>
+                        <div class="input-with-btn">
+                            <input type="text" id="start" placeholder="Tippen oder 📍 klicken" required ondblclick="openMapPicker('start')">
+                            <button type="button" class="btn-icon" onclick="openMapPicker('start')" title="Auf Karte wählen">📍</button>
+                        </div>
                     </div>
+                    
                     <div class="form-group">
                         <label for="ziel">Zieladresse</label>
-                        <input type="text" id="ziel" placeholder="z.B. Hauptplatz 5, Potsdam" required>
+                        <div class="input-with-btn">
+                            <input type="text" id="ziel" placeholder="Tippen oder 📍 klicken" required ondblclick="openMapPicker('ziel')">
+                            <button type="button" class="btn-icon" onclick="openMapPicker('ziel')" title="Auf Karte wählen">📍</button>
+                        </div>
                     </div>
                     
                     <button type="button" class="btn-calc" id="btnBerechnen" onclick="berechneRoute()">📍 Distanz automatisch berechnen</button>
@@ -100,7 +116,6 @@
         </div>
 
         <div class="sidebar">
-            
             <div class="box">
                 <h3>⚙️ Routing Engine</h3>
                 <div class="form-group">
@@ -114,7 +129,6 @@
                 <div class="form-group hidden" id="googleKeyContainer">
                     <label for="apiKey">Google API Key:</label>
                     <input type="password" id="apiKey" placeholder="AIzaSyB...">
-                    <small style="color: #7f8c8d; margin-top: 5px;">Wird nur lokal gespeichert.</small>
                 </div>
             </div>
 
@@ -138,7 +152,16 @@
                     <input type="number" step="0.01" id="kmPreis" value="0.30" onchange="aktualisiereAnsicht()">
                 </div>
             </div>
-            
+        </div>
+    </div>
+
+    <div id="mapModal" class="map-modal">
+        <div class="map-container">
+            <div class="map-header">
+                <span id="mapTitle">Tippe auf die Karte, um die Adresse zu wählen</span>
+                <button type="button" onclick="closeMapPicker()">Abbrechen</button>
+            </div>
+            <div id="mapView"></div>
         </div>
     </div>
 
@@ -148,14 +171,83 @@
         const SETTINGS_KEY = 'mein_fahrtenbuch_settings';
         let fahrten = [];
 
+        // --- MAP PICKER LOGIK ---
+        let pickerMap = null;
+        let pickerMarker = null;
+        let currentTargetField = '';
+
+        function openMapPicker(fieldId) {
+            currentTargetField = fieldId;
+            document.getElementById('mapModal').style.display = 'flex';
+            document.getElementById('mapTitle').innerText = "Klicke auf die Karte...";
+            
+            // Karte initialisieren (nur beim ersten Mal nötig)
+            if (!pickerMap) {
+                // Setze Startpunkt (z.B. Mitte von Deutschland)
+                pickerMap = L.map('mapView').setView([51.165691, 10.451526], 6); 
+                
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap'
+                }).addTo(pickerMap);
+
+                // Wenn auf die Karte geklickt wird
+                pickerMap.on('click', async function(e) {
+                    const lat = e.latlng.lat;
+                    const lon = e.latlng.lng;
+                    
+                    // Marker setzen
+                    if (pickerMarker) pickerMap.removeLayer(pickerMarker);
+                    pickerMarker = L.marker([lat, lon]).addTo(pickerMap);
+                    
+                    document.getElementById('mapTitle').innerText = "Lade Adresse...";
+                    
+                    try {
+                        // Reverse Geocoding via Nominatim
+                        const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&addressdetails=1`);
+                        const data = await response.json();
+                        
+                        if(data && data.address) {
+                            let adresse = "";
+                            const a = data.address;
+                            
+                            if(a.road) adresse += a.road + " ";
+                            if(a.house_number) adresse += a.house_number + ", ";
+                            if(a.postcode) adresse += a.postcode + " ";
+                            if(a.city || a.town || a.village) adresse += (a.city || a.town || a.village);
+                            
+                            // Fallback, falls keine Straße gefunden wurde
+                            if(adresse.trim() === "") adresse = data.display_name;
+
+                            // Adresse in das richtige Textfeld eintragen
+                            document.getElementById(currentTargetField).value = adresse.trim();
+                            closeMapPicker();
+                        }
+                    } catch (err) {
+                        alert("Fehler beim Abrufen der Adresse. Bitte prüfe deine Internetverbindung.");
+                        document.getElementById('mapTitle').innerText = "Fehler. Bitte erneut klicken.";
+                    }
+                });
+            }
+            
+            // Wichtig: Karte zwingen, ihre Größe neu zu berechnen, nachdem das Modal sichtbar wurde
+            setTimeout(() => {
+                pickerMap.invalidateSize();
+                
+                // Versuche, den aktuellen Standort des Nutzers zu finden (Optional, fragt nach Erlaubnis)
+                pickerMap.locate({setView: true, maxZoom: 14});
+            }, 100);
+        }
+
+        function closeMapPicker() {
+            document.getElementById('mapModal').style.display = 'none';
+        }
+
         // --- INITIALISIERUNG ---
         window.onload = function() {
             ladeDaten();
             ladeEinstellungen();
-            
             document.getElementById('filterVon').value = getErsterTagDesMonats();
             document.getElementById('filterBis').value = getLetzterTagDesMonats();
-            
             aktualisiereAnsicht();
             toggleApiSettings();
         };
@@ -165,18 +257,15 @@
             const data = localStorage.getItem(STORAGE_KEY);
             if (data) fahrten = JSON.parse(data);
         }
-
         function speichereDaten() {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(fahrten));
         }
-
         function ladeEinstellungen() {
             const settings = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}');
             if(settings.apiAuswahl) document.getElementById('apiAuswahl').value = settings.apiAuswahl;
             if(settings.apiKey) document.getElementById('apiKey').value = settings.apiKey;
             if(settings.kmPreis) document.getElementById('kmPreis').value = settings.kmPreis;
         }
-
         function speichereEinstellungen() {
             const settings = {
                 apiAuswahl: document.getElementById('apiAuswahl').value,
@@ -211,10 +300,7 @@
             const ziel = document.getElementById('ziel').value;
             const methode = document.getElementById('apiAuswahl').value;
             
-            if(!start || !ziel) {
-                alert("Bitte gib Start- und Zieladresse ein!");
-                return;
-            }
+            if(!start || !ziel) { alert("Bitte gib Start- und Zieladresse ein!"); return; }
 
             const btn = document.getElementById('btnBerechnen');
             const status = document.getElementById('calcStatus');
@@ -223,17 +309,12 @@
 
             try {
                 let distanz = 0;
-                speichereEinstellungen(); // Speichert den API Key, falls gerade eingetippt
+                speichereEinstellungen();
 
-                if (methode === 'osm') {
-                    distanz = await holeOsmDistanz(start, ziel);
-                } else if (methode === 'google') {
-                    distanz = await holeGoogleDistanz(start, ziel);
-                }
+                if (methode === 'osm') distanz = await holeOsmDistanz(start, ziel);
+                else if (methode === 'google') distanz = await holeGoogleDistanz(start, ziel);
 
-                // Ergebnis runden und eintragen
                 document.getElementById('distanz').value = (Math.round(distanz * 10) / 10).toFixed(1);
-                
             } catch (error) {
                 alert("Fehler bei der Berechnung:\n" + error.message);
             } finally {
@@ -242,36 +323,27 @@
             }
         }
 
-        // API 1: OpenStreetMap (Nominatim + OSRM)
         async function holeOsmDistanz(start, ziel) {
-            // 1. Koordinaten finden
             const geoStart = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(start)}`).then(r => r.json());
             const geoZiel = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(ziel)}`).then(r => r.json());
 
-            if(geoStart.length === 0) throw new Error("Startadresse über OSM nicht gefunden. Bitte genauer eingeben (z.B. mit PLZ).");
-            if(geoZiel.length === 0) throw new Error("Zieladresse über OSM nicht gefunden. Bitte genauer eingeben (z.B. mit PLZ).");
+            if(geoStart.length === 0) throw new Error("Startadresse über OSM nicht gefunden. Bitte genauer eingeben.");
+            if(geoZiel.length === 0) throw new Error("Zieladresse über OSM nicht gefunden. Bitte genauer eingeben.");
 
             const lon1 = geoStart[0].lon, lat1 = geoStart[0].lat;
             const lon2 = geoZiel[0].lon, lat2 = geoZiel[0].lat;
 
-            // 2. Route berechnen
             const route = await fetch(`https://router.project-osrm.org/route/v1/driving/${lon1},${lat1};${lon2},${lat2}?overview=false`).then(r => r.json());
-            
-            if(route.code !== "Ok" || !route.routes || route.routes.length === 0) {
-                throw new Error("Konnte keine Route zwischen den Punkten finden.");
-            }
-
-            return route.routes[0].distance / 1000; // Umrechnung Meter in Kilometer
+            if(route.code !== "Ok" || !route.routes || route.routes.length === 0) throw new Error("Konnte keine Route finden.");
+            return route.routes[0].distance / 1000; 
         }
 
-        // API 2: Google Maps
         function ladeGoogleScript(apiKey) {
             return new Promise((resolve, reject) => {
-                if (window.google && window.google.maps) return resolve(); // Bereits geladen
+                if (window.google && window.google.maps) return resolve();
                 const script = document.createElement('script');
                 script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}`;
-                script.async = true;
-                script.defer = true;
+                script.async = true; script.defer = true;
                 script.onload = resolve;
                 script.onerror = () => reject(new Error("Google Maps Script konnte nicht geladen werden. API Key prüfen!"));
                 document.head.appendChild(script);
@@ -281,59 +353,39 @@
         async function holeGoogleDistanz(start, ziel) {
             const apiKey = document.getElementById('apiKey').value.trim();
             if(!apiKey) throw new Error("Bitte trage rechts deinen Google API Key ein.");
-
             await ladeGoogleScript(apiKey);
-
             return new Promise((resolve, reject) => {
                 const service = new google.maps.DistanceMatrixService();
-                service.getDistanceMatrix({
-                    origins: [start],
-                    destinations: [ziel],
-                    travelMode: 'DRIVING'
-                }, (response, status) => {
-                    if (status !== 'OK') {
-                        reject(new Error("Google API Fehler: " + status));
-                        return;
-                    }
+                service.getDistanceMatrix({ origins: [start], destinations: [ziel], travelMode: 'DRIVING' }, (response, status) => {
+                    if (status !== 'OK') return reject(new Error("Google API Fehler: " + status));
                     const element = response.rows[0].elements[0];
-                    if (element.status === 'OK') {
-                        resolve(element.distance.value / 1000);
-                    } else {
-                        reject(new Error("Google konnte keine Route finden: " + element.status));
-                    }
+                    if (element.status === 'OK') resolve(element.distance.value / 1000);
+                    else reject(new Error("Google konnte keine Route finden: " + element.status));
                 });
             });
         }
 
-        // --- HELPER FUNKTIONEN FÜR DATUM ---
+        // --- HELPER FUNKTIONEN FÜR DATUM (ZEITZONEN FIX) ---
         function formatLocalDatum(dateObj) {
             const jahr = dateObj.getFullYear();
             const monat = String(dateObj.getMonth() + 1).padStart(2, '0');
             const tag = String(dateObj.getDate()).padStart(2, '0');
             return `${jahr}-${monat}-${tag}`;
         }
-
         function getLetztesDatum() {
             if (fahrten.length === 0) return getHeute();
             const daten = fahrten.map(f => new Date(f.datum));
             const maxDatum = new Date(Math.max.apply(null, daten));
             return formatLocalDatum(maxDatum);
         }
-
-        function getHeute() { 
-            return formatLocalDatum(new Date()); 
-        }
-
+        function getHeute() { return formatLocalDatum(new Date()); }
         function getErsterTagDesMonats() {
             const d = new Date();
-            const ersterTag = new Date(d.getFullYear(), d.getMonth(), 1);
-            return formatLocalDatum(ersterTag);
+            return formatLocalDatum(new Date(d.getFullYear(), d.getMonth(), 1));
         }
-
         function getLetzterTagDesMonats() {
             const d = new Date();
-            const letzterTag = new Date(d.getFullYear(), d.getMonth() + 1, 0);
-            return formatLocalDatum(letzterTag);
+            return formatLocalDatum(new Date(d.getFullYear(), d.getMonth() + 1, 0));
         }
 
         // --- TABELLE UND AUSWERTUNG ---
@@ -343,26 +395,21 @@
             const filterBis = document.getElementById('filterBis').value;
             const preisProKm = parseFloat(document.getElementById('kmPreis').value) || 0.30;
             
-            // Filter
             let gefilterteFahrten = fahrten.filter(f => {
                 if (filterVon && f.datum < filterVon) return false;
                 if (filterBis && f.datum > filterBis) return false;
                 return true;
             });
 
-            // Sortieren (Neueste oben)
             gefilterteFahrten.sort((a, b) => new Date(b.datum) - new Date(a.datum));
-            
             const tbody = document.getElementById('tabelleBody');
             tbody.innerHTML = '';
             
-            let summeDistanz = 0;
-            let summeKosten = 0;
+            let summeDistanz = 0, summeKosten = 0;
 
             gefilterteFahrten.forEach(fahrt => {
                 const kosten = fahrt.distanz * preisProKm;
                 const deDatum = new Date(fahrt.datum).toLocaleDateString('de-DE');
-                
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>${deDatum}</td>
@@ -373,23 +420,19 @@
                     <td><button class="delete-btn" onclick="loescheFahrt(${fahrt.id})">Löschen</button></td>
                 `;
                 tbody.appendChild(tr);
-
                 summeDistanz += fahrt.distanz;
                 summeKosten += kosten;
             });
 
-            // Infobox Update
             document.getElementById('infoAnzahl').innerText = gefilterteFahrten.length;
             document.getElementById('infoDistanz').innerText = summeDistanz.toFixed(1).replace('.', ',') + ' km';
             document.getElementById('infoKosten').innerText = summeKosten.toFixed(2).replace('.', ',') + ' €';
-
             document.getElementById('datum').value = getLetztesDatum();
         }
 
         // --- FORMULAR ABSENDEN ---
         document.getElementById('fahrtForm').addEventListener('submit', function(e) {
             e.preventDefault();
-
             const neueFahrt = {
                 id: Date.now(),
                 datum: document.getElementById('datum').value,
@@ -397,15 +440,11 @@
                 ziel: document.getElementById('ziel').value,
                 distanz: parseFloat(document.getElementById('distanz').value.replace(',', '.'))
             };
-
             fahrten.push(neueFahrt);
             speichereDaten();
-            
-            // Eingabefelder leeren
             document.getElementById('distanz').value = '';
             document.getElementById('start').value = '';
             document.getElementById('ziel').value = '';
-            
             aktualisiereAnsicht();
         });
 
