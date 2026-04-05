@@ -297,161 +297,69 @@
         }
 
         /* ========================================================
-           SMARTPHONE OPTIMIERUNG (CARD LAYOUT)
-        ======================================================== */
+           SMARTPHONE OPTIMIERUNG (CARD LAYOUT & FORMULAR)
+           ======================================================== */
         @media (max-width: 768px) {
-            /* Zwingt das Grid-Layout rigoros auf genau eine Spalte */
-            .form-grid {
-                grid-template-columns: 1fr !important;
+            body { padding: 10px; }
+            .container { display: flex; flex-direction: column; }
+            
+            /* 1. GRID KOMPLETT ABSCHALTEN - Formular wird zur vertikalen Liste */
+            .form-grid { 
+                display: flex !important; 
+                flex-direction: column !important; 
+                gap: 15px;
+            }
+            
+            .form-group { width: 100%; margin: 0; }
+            
+            /* 2. Sichern, dass das Eingabefeld den 📍-Button an den Rand drückt */
+            .input-with-btn { 
+                display: flex; 
+                width: 100%; 
+            }
+            .input-with-btn input { 
+                flex-grow: 1; /* Nimmt den gesamten restlichen Platz ein */
+                width: 100%; 
             }
 
-            /* Verhindert, dass das Notizen-Feld versucht, 2 Spalten zu greifen, wo nur noch 1 ist */
-            .full-width {
-                grid-column: span 1 !important;
-            }
-
-            body {
-                padding: 10px;
-            }
-
-            .container {
-                grid-template-columns: 1fr;
-            }
-
-            .form-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .full-width {
-                grid-column: span 1;
-            }
-
-            /* Zerstöre die klassische Tabellenstruktur */
-            table,
-            thead,
-            tbody,
-            th,
-            td,
-            tr {
-                display: block;
-            }
-
-            /* 1. Mache aus den Tabellenköpfen ein schönes Filter-Menü */
-            thead {
-                background: #f8f9fa;
-                padding: 15px;
-                border-radius: 8px;
-                border: 1px solid #ddd;
-                margin-bottom: 20px;
-            }
-
-            thead tr {
-                border: none;
-                padding: 0;
-            }
-
-            th {
-                border: none;
-                padding: 5px 0;
-            }
-
-            th br {
-                display: none;
-            }
-
-            /* Verstecke die Zeilenumbrüche */
-
-            /* Verstecke Header ohne Filter (km, Kosten, Aktionen) */
-            th:nth-child(5),
-            th:nth-child(6),
-            th:nth-child(7) {
-                display: none;
-            }
-
-            /* 2. Mache aus jeder Tabellenzeile eine schöne Karte */
-            #tabelleBody tr {
-                margin-bottom: 20px;
-                border: 1px solid #dcdde1;
-                border-radius: 8px;
-                padding: 10px 15px;
-                background: #fff;
-                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-            }
-
-            /* 3. Mache aus den Zellen beschriftete Reihen */
-            td {
-                display: flex;
-                justify-content: space-between;
-                align-items: flex-start;
-                text-align: right;
-                border-bottom: 1px solid #f1f2f6;
-                padding: 8px 0;
-                font-size: 14px;
-            }
-
-            td:last-child {
-                border-bottom: none;
-                padding-bottom: 0;
-            }
-
-            /* Das unsichtbare Schild (data-label) einfügen */
-            td::before {
-                content: attr(data-label);
-                font-weight: bold;
-                color: #2c3e50;
-                text-align: left;
-                margin-right: 15px;
-                flex-shrink: 0;
-            }
-
-            /* Notizen sollen ggf. in eine neue Zeile umbrechen */
-            td[data-label="Notizen"] {
-                flex-direction: column;
-                text-align: left;
-                align-items: flex-start;
-            }
-
-            td[data-label="Notizen"]::before {
-                margin-bottom: 5px;
-            }
-
-            /* Aktionen-Buttons ordentlich anordnen */
-            .action-btns {
-                justify-content: flex-end;
-                gap: 10px;
+            /* Buttons auf volle Breite zwingen */
+            .btn-submit, .btn-calc { 
+                width: 100%; 
                 margin-top: 5px;
             }
-
-            /* Wähle die Container für Start-, Zieladresse und Notizen aus */
-            #fahrtForm .form-group {
-                display: block;
-                /* Ordne die form-groups untereinander an */
-                width: 100%;
-                /* Nimm die volle Breite ein */
-                margin-bottom: 15px;
-                /* Füge etwas Abstand zwischen den Feldern hinzu */
+            
+            /* Zerstöre die klassische Tabellenstruktur */
+            table, thead, tbody, th, td, tr { display: block; }
+            
+            /* Mache aus den Tabellenköpfen ein schönes Filter-Menü */
+            thead { background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #ddd; margin-bottom: 20px; }
+            thead tr { border: none; padding: 0; }
+            th { border: none; padding: 5px 0; }
+            th br { display: none; } 
+            th:nth-child(5), th:nth-child(6), th:nth-child(7) { display: none; }
+            
+            /* Mache aus jeder Tabellenzeile eine Karte */
+            #tabelleBody tr { 
+                margin-bottom: 20px; border: 1px solid #dcdde1; border-radius: 8px; 
+                padding: 10px 15px; background: #fff; box-shadow: 0 4px 6px rgba(0,0,0,0.05);
             }
-
-            /* Wähle die Eingabefelder und die Textarea innerhalb der form-groups aus */
-            #fahrtForm input,
-            #fahrtForm textarea {
-                display: block;
-                /* Nimm die volle Breite ein */
-                width: 100%;
-                /* Setze die Breite auf 100% */
-                box-sizing: border-box;
-                /* Stelle sicher, dass Padding und Border die Breite nicht vergrößern */
+            
+            /* Mache aus den Zellen beschriftete Reihen */
+            td { 
+                display: flex; justify-content: space-between; align-items: flex-start;
+                text-align: right; border-bottom: 1px solid #f1f2f6; padding: 8px 0; font-size: 14px;
             }
-
-            /* Passe das Notizen-Textarea-Feld spezifisch an */
-            #notizen {
-                resize: vertical;
-                /* Erlaube nur vertikales Ändern der Größe */
-                min-height: 100px;
-                /* Setze eine Mindesthöhe für bessere Lesbarkeit */
+            td:last-child { border-bottom: none; padding-bottom: 0; }
+            
+            td::before { 
+                content: attr(data-label); font-weight: bold; color: #2c3e50; 
+                text-align: left; margin-right: 15px; flex-shrink: 0; 
             }
-        }
-    </style>
+            
+            td[data-label="Notizen:"] { flex-direction: column; text-align: left; align-items: flex-start; }
+            td[data-label="Notizen:"]::before { margin-bottom: 5px; }
+            .action-btns { justify-content: flex-end; gap: 10px; margin-top: 5px; }
+        }    </style>
 </head>
 
 <body>
