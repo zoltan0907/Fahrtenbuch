@@ -1,526 +1,121 @@
 <!DOCTYPE html>
 <html lang="de">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Fahrtenbuch</title>
-
+    
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Fahrtenbuch">
-
+    
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#2c3e50">
 
-    <link rel="manifest"
-        href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22Fahrtenbuch%22%2C%22short_name%22%3A%22Fahrtenbuch%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23f4f7f6%22%2C%22theme_color%22%3A%22%232c3e50%22%7D">
+    <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22Fahrtenbuch%22%2C%22short_name%22%3A%22Fahrtenbuch%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23f4f7f6%22%2C%22theme_color%22%3A%22%232c3e50%22%7D">
 
-    <link rel="icon"
-        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚗</text></svg>">
-    <link rel="apple-touch-icon"
-        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚗</text></svg>">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚗</text></svg>">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚗</text></svg>">
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f7f6;
-            margin: 0;
-            padding: 20px;
-            color: #333;
-        }
-
-        h1 {
-            text-align: center;
-            color: #2c3e50;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: 1fr 320px;
-            gap: 20px;
-        }
-
-        .sidebar {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            position: sticky;
-            top: 20px;
-        }
-
-        .box {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .box h3 {
-            margin-top: 0;
-            border-bottom: 2px solid #3498db;
-            padding-bottom: 10px;
-            font-size: 18px;
-        }
-
-        .info-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 12px;
-            font-size: 15px;
-        }
-
-        .info-row strong {
-            color: #2980b9;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            margin-bottom: 12px;
-        }
-
-        label {
-            margin-bottom: 5px;
-            font-size: 13px;
-            font-weight: bold;
-            color: #555;
-        }
-
-        input,
-        select,
-        textarea {
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            font-size: 14px;
-            width: 100%;
-            box-sizing: border-box;
-        }
-
-        textarea {
-            resize: vertical;
-            min-height: 40px;
-        }
-
-        .input-with-btn {
-            display: flex;
-            gap: 5px;
-            width: 100%;
-        }
-
-        .input-with-btn input {
-            flex-grow: 1;
-            width: 100%;
-        }
-
-        .btn-icon {
-            width: auto;
-            padding: 10px 15px;
-            background-color: #34495e;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        .main-content {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .form-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .full-width {
-            grid-column: span 2;
-        }
-
-        button {
-            background-color: #27ae60;
-            color: white;
-            border: none;
-            padding: 12px;
-            border-radius: 4px;
-            font-size: 15px;
-            cursor: pointer;
-            transition: background 0.3s;
-            font-weight: bold;
-        }
-
-        button:hover {
-            background-color: #2ecc71;
-        }
-
-        .btn-submit {
-            grid-column: span 2;
-            margin-top: 10px;
-        }
-
-        .btn-calc {
-            background-color: #f39c12;
-            grid-column: span 2;
-        }
-
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; color: #333; }
+        h1 { text-align: center; color: #2c3e50; }
+        .container { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr 320px; gap: 20px; }
+        
+        .sidebar { display: flex; flex-direction: column; gap: 20px; position: sticky; top: 20px; }
+        .box { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .box h3 { margin-top: 0; border-bottom: 2px solid #3498db; padding-bottom: 10px; font-size: 18px; }
+        .info-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 15px; }
+        .info-row strong { color: #2980b9; }
+        
+        .form-group { display: flex; flex-direction: column; margin-bottom: 12px;}
+        label { margin-bottom: 5px; font-size: 13px; font-weight: bold; color: #555; }
+        input, select, textarea { padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; width: 100%; box-sizing: border-box; }
+        textarea { resize: vertical; min-height: 40px; }
+        
+        .input-with-btn { display: flex; gap: 5px; width: 100%; }
+        .input-with-btn input { flex-grow: 1; width: 100%; }
+        .btn-icon { width: auto; padding: 10px 15px; background-color: #34495e; color: white; border: none; border-radius: 4px; cursor: pointer;}
+        
+        .main-content { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        .full-width { grid-column: span 2; }
+        
+        button { background-color: #27ae60; color: white; border: none; padding: 12px; border-radius: 4px; font-size: 15px; cursor: pointer; transition: background 0.3s; font-weight: bold; }
+        button:hover { background-color: #2ecc71; }
+        .btn-submit { grid-column: span 2; margin-top: 10px;}
+        .btn-calc { background-color: #f39c12; grid-column: span 2; }
+        
         /* Sidebar Buttons */
-        .btn-share {
-            background-color: #3498db;
-            width: 100%;
-            margin-top: 0;
-        }
-
-        .btn-share:hover {
-            background-color: #2980b9;
-        }
-
-        .btn-export {
-            background-color: #8e44ad;
-            width: 100%;
-            margin-bottom: 10px;
-        }
-
-        .btn-import {
-            background-color: #2c3e50;
-            width: 100%;
-        }
-
-        .file-input-wrapper {
-            position: relative;
-            overflow: hidden;
-            display: inline-block;
-            width: 100%;
-        }
-
-        .file-input-wrapper input[type=file] {
-            font-size: 100px;
-            position: absolute;
-            left: 0;
-            top: 0;
-            opacity: 0;
-            cursor: pointer;
-            height: 100%;
-        }
-
-        /* Filter-Leiste über der Tabelle */
-        .table-controls {
-            display: flex;
-            gap: 15px;
-            align-items: flex-end;
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid #ddd;
-            margin-top: 30px;
-            margin-bottom: 10px;
-        }
-
-        .table-filter-group {
-            display: flex;
-            flex-direction: column;
-            flex-grow: 1;
-        }
-
-        .table-filter-group label {
-            margin-bottom: 5px;
-            font-size: 13px;
-            font-weight: bold;
-            color: #2c3e50;
-        }
-
-        .btn-reset {
-            background-color: #95a5a6;
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 4px;
-            cursor: pointer;
-            height: 42px;
-            font-size: 14px;
-            font-weight: bold;
-        }
-
-        .btn-reset:hover {
-            background-color: #7f8c8d;
-        }
+        .btn-share { background-color: #3498db; width: 100%; margin-top: 0; }
+        .btn-share:hover { background-color: #2980b9; }
+        .btn-export { background-color: #8e44ad; width: 100%; margin-bottom: 10px; }
+        .btn-import { background-color: #2c3e50; width: 100%; }
+        .file-input-wrapper { position: relative; overflow: hidden; display: inline-block; width: 100%; }
+        .file-input-wrapper input[type=file] { font-size: 100px; position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; height: 100%; }
+        
+        /* Filter-Leiste */
+        .table-controls { display: flex; gap: 15px; align-items: flex-end; background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #ddd; margin-top: 30px; margin-bottom: 10px; }
+        .table-filter-group { display: flex; flex-direction: column; flex-grow: 1; }
+        .table-filter-group label { margin-bottom: 5px; font-size: 13px; font-weight: bold; color: #2c3e50; }
+        .btn-reset { background-color: #95a5a6; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; height: 42px; font-size: 14px; font-weight: bold;}
+        .btn-reset:hover { background-color: #7f8c8d; }
 
         /* Tabelle */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-            font-size: 13px;
-            table-layout: fixed;
-        }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; table-layout: fixed; }
+        th, td { padding: 10px 8px; text-align: left; border-bottom: 1px solid #ddd; vertical-align: top; word-wrap: break-word; }
+        th { background-color: #f8f9fa; color: #2c3e50; }
+        .col-filter { width: 100%; padding: 5px; font-size: 11px; margin-top: 5px; border: 1px solid #bdc3c7; border-radius: 3px; box-sizing: border-box; }
+        .action-btns { display: flex; gap: 5px; flex-wrap: wrap; width: 100%; }
+        .delete-btn { background-color: #e74c3c; padding: 6px 10px; font-size: 11px; margin: 0; }
+        .copy-btn { background-color: #3498db; padding: 6px 10px; font-size: 11px; margin: 0; }
+        .hidden { display: none !important; }
+        .loading { font-size: 12px; color: #e67e22; margin-top: 5px; font-weight: bold; }
 
-        th,
-        td {
-            padding: 10px 8px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-            vertical-align: top;
-            word-wrap: break-word;
-        }
+        /* Overlays & Modals */
+        .map-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center; }
+        .map-container { background: white; width: 95%; max-width: 600px; height: 70vh; border-radius: 8px; display: flex; flex-direction: column; overflow: hidden; }
+        #mapView { flex-grow: 1; width: 100%; cursor: crosshair; }
 
-        th {
-            background-color: #f8f9fa;
-            color: #2c3e50;
-        }
-
-        .col-filter {
-            width: 100%;
-            padding: 5px;
-            font-size: 11px;
-            margin-top: 5px;
-            border: 1px solid #bdc3c7;
-            border-radius: 3px;
-            box-sizing: border-box;
-        }
-
-        .action-btns {
-            display: flex;
-            gap: 5px;
-            flex-wrap: wrap;
-            width: 100%;
-        }
-
-        .delete-btn {
-            background-color: #e74c3c;
-            padding: 6px 10px;
-            font-size: 11px;
-            margin: 0;
-        }
-
-        .copy-btn {
-            background-color: #3498db;
-            padding: 6px 10px;
-            font-size: 11px;
-            margin: 0;
-        }
-
-        .hidden {
-            display: none !important;
-        }
-
-        .loading {
-            font-size: 12px;
-            color: #e67e22;
-            margin-top: 5px;
-            font-weight: bold;
-        }
-
-        /* Map Modal */
-        .map-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.6);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .map-container {
-            background: white;
-            width: 95%;
-            max-width: 600px;
-            height: 70vh;
-            border-radius: 8px;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        #mapView {
-            flex-grow: 1;
-            width: 100%;
-            cursor: crosshair;
-        }
-
-        /* Login Overlay */
-        #loginOverlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #2c3e50;
-            z-index: 9999;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .login-box {
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            width: 90%;
-            max-width: 400px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            text-align: center;
-        }
-
-        .login-box h2 {
-            margin-top: 0;
-            color: #2c3e50;
-        }
-
-        .login-box input {
-            width: 100%;
-            margin-bottom: 15px;
-            font-size: 16px;
-            padding: 12px;
-            box-sizing: border-box;
-            text-align: center;
-        }
-
-        .login-box button {
-            width: 100%;
-            font-size: 16px;
-            padding: 12px;
-        }
+        #loginOverlay, #bulkModal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(44, 62, 80, 0.95); z-index: 9999; display: flex; justify-content: center; align-items: center; }
+        #bulkModal { background: rgba(0,0,0,0.7); display: none; }
+        
+        .login-box { background: white; padding: 30px; border-radius: 12px; width: 90%; max-width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); text-align: center; }
+        .login-box h2 { margin-top: 0; color: #2c3e50; }
+        .login-box input { width: 100%; margin-bottom: 15px; font-size: 16px; padding: 12px; box-sizing: border-box; text-align: center; }
+        .login-box button { width: 100%; font-size: 16px; padding: 12px; }
 
         /* Smartphone Optimierung */
         @media (max-width: 768px) {
-            body {
-                padding: 10px;
-            }
+            body { padding: 10px; }
+            .container { display: flex; flex-direction: column; }
+            .form-grid { display: flex !important; flex-direction: column !important; gap: 15px; }
+            .form-group { width: 100%; margin: 0; }
+            .btn-submit, .btn-calc { width: 100%; margin-top: 5px; }
+            
+            .table-controls { flex-direction: column; align-items: stretch; gap: 10px; }
+            .btn-reset { margin-top: 5px; }
 
-            .container {
-                display: flex;
-                flex-direction: column;
-            }
-
-            .form-grid {
-                display: flex !important;
-                flex-direction: column !important;
-                gap: 15px;
-            }
-
-            .form-group {
-                width: 100%;
-                margin: 0;
-            }
-
-            .btn-submit,
-            .btn-calc {
-                width: 100%;
-                margin-top: 5px;
-            }
-
-            .table-controls {
-                flex-direction: column;
-                align-items: stretch;
-                gap: 10px;
-            }
-
-            .btn-reset {
-                margin-top: 5px;
-            }
-
-            table,
-            thead,
-            tbody,
-            th,
-            td,
-            tr {
-                display: block;
-            }
-
-            thead {
-                background: #f8f9fa;
-                padding: 15px;
-                border-radius: 8px;
-                border: 1px solid #ddd;
-                margin-bottom: 20px;
-            }
-
-            thead tr {
-                border: none;
-                padding: 0;
-            }
-
-            th {
-                border: none;
-                padding: 5px 0;
-            }
-
-            th br {
-                display: none;
-            }
-
-            th:nth-child(5),
-            th:nth-child(6),
-            th:nth-child(7) {
-                display: none;
-            }
-
-            #tabelleBody tr {
-                margin-bottom: 20px;
-                border: 1px solid #dcdde1;
-                border-radius: 8px;
-                padding: 10px 15px;
-                background: #fff;
-                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-            }
-
-            td {
-                display: flex;
-                justify-content: space-between;
-                align-items: flex-start;
-                text-align: right;
-                border-bottom: 1px solid #f1f2f6;
-                padding: 8px 0;
-                font-size: 14px;
-            }
-
-            td:last-child {
-                border-bottom: none;
-                padding-bottom: 0;
-            }
-
-            td::before {
-                content: attr(data-label);
-                font-weight: bold;
-                color: #2c3e50;
-                text-align: left;
-                margin-right: 15px;
-                flex-shrink: 0;
-            }
-
-            td[data-label="Notizen:"] {
-                flex-direction: column;
-                text-align: left;
-                align-items: flex-start;
-            }
-
-            td[data-label="Notizen:"]::before {
-                margin-bottom: 5px;
-            }
-
-            .action-btns {
-                justify-content: flex-end;
-                gap: 10px;
-                margin-top: 5px;
-            }
+            table, thead, tbody, th, td, tr { display: block; }
+            thead { background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #ddd; margin-bottom: 20px; }
+            thead tr { border: none; padding: 0; }
+            th { border: none; padding: 5px 0; }
+            th br { display: none; } 
+            th:nth-child(5), th:nth-child(6), th:nth-child(7) { display: none; }
+            
+            #tabelleBody tr { margin-bottom: 20px; border: 1px solid #dcdde1; border-radius: 8px; padding: 10px 15px; background: #fff; box-shadow: 0 4px 6px rgba(0,0,0,0.05);}
+            td { display: flex; justify-content: space-between; align-items: flex-start; text-align: right; border-bottom: 1px solid #f1f2f6; padding: 8px 0; font-size: 14px; }
+            td:last-child { border-bottom: none; padding-bottom: 0; }
+            td::before { content: attr(data-label); font-weight: bold; color: #2c3e50; text-align: left; margin-right: 15px; flex-shrink: 0; }
+            td[data-label="Notizen:"] { flex-direction: column; text-align: left; align-items: flex-start; }
+            td[data-label="Notizen:"]::before { margin-bottom: 5px; }
+            .action-btns { justify-content: flex-end; gap: 10px; margin-top: 5px; }
         }
     </style>
 </head>
-
 <body>
 
     <div id="loginOverlay">
@@ -530,6 +125,22 @@
             <input type="password" id="masterPasswort" placeholder="Passwort...">
             <button type="button" onclick="entsperreApp()" id="loginBtn">Entsperren</button>
             <p id="loginError" class="hidden" style="color: #e74c3c; font-weight: bold; margin-top: 15px;"></p>
+        </div>
+    </div>
+
+    <div id="bulkModal">
+        <div class="login-box">
+            <h2>🔁 Bulk-Kopie</h2>
+            <p style="font-size: 14px; color: #555;">Du kopierst <strong id="bulkCount">0</strong> aktuell angezeigte Fahrten.</p>
+            <p style="font-size: 13px; margin-bottom: 15px; background: #f8f9fa; padding: 8px; border-radius: 4px;">Ursprünglicher Start: <strong id="bulkOldStart"></strong></p>
+            
+            <label style="display:block; text-align:left; margin-bottom: 5px; font-weight: bold; font-size: 13px;">Neues Startdatum (für erste Fahrt):</label>
+            <input type="date" id="bulkNewDate" required>
+            
+            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                <button type="button" onclick="closeBulkCopyModal()" style="background: #e74c3c;">Abbrechen</button>
+                <button type="button" onclick="executeBulkCopy()" style="background: #27ae60;">Kopieren</button>
+            </div>
         </div>
     </div>
 
@@ -551,16 +162,14 @@
                     <div class="form-group">
                         <label>Startadresse</label>
                         <div class="input-with-btn">
-                            <input type="text" id="start" placeholder="Tippen oder 📍" required
-                                ondblclick="openMapPicker('start')">
+                            <input type="text" id="start" placeholder="Tippen oder 📍" required ondblclick="openMapPicker('start')">
                             <button type="button" class="btn-icon" onclick="openMapPicker('start')">📍</button>
                         </div>
                     </div>
                     <div class="form-group">
                         <label>Zieladresse</label>
                         <div class="input-with-btn">
-                            <input type="text" id="ziel" placeholder="Tippen oder 📍" required
-                                ondblclick="openMapPicker('ziel')">
+                            <input type="text" id="ziel" placeholder="Tippen oder 📍" required ondblclick="openMapPicker('ziel')">
                             <button type="button" class="btn-icon" onclick="openMapPicker('ziel')">📍</button>
                         </div>
                     </div>
@@ -568,8 +177,7 @@
                         <label>Notizen</label>
                         <textarea id="notizen" placeholder="Zweck der Fahrt, Tanken, etc."></textarea>
                     </div>
-                    <button type="button" class="btn-calc" id="btnBerechnen" onclick="berechneRoute()">📍 Distanz
-                        automatisch berechnen</button>
+                    <button type="button" class="btn-calc" id="btnBerechnen" onclick="berechneRoute()">📍 Distanz automatisch berechnen</button>
                     <div id="calcStatus" class="loading hidden">Berechne Route...</div>
                     <button type="submit" class="btn-submit">💾 Fahrt speichern</button>
                 </div>
@@ -590,14 +198,10 @@
             <table id="fahrtenTabelle">
                 <thead>
                     <tr>
-                        <th style="width: 85px;">Datum<br><input type="text" id="colFilterDatum" class="col-filter"
-                                placeholder="Suchen..." onkeyup="aktualisiereAnsicht()"></th>
-                        <th>Start<br><input type="text" id="colFilterStart" class="col-filter" placeholder="Suchen..."
-                                onkeyup="aktualisiereAnsicht()"></th>
-                        <th>Ziel<br><input type="text" id="colFilterZiel" class="col-filter" placeholder="Suchen..."
-                                onkeyup="aktualisiereAnsicht()"></th>
-                        <th>Notizen<br><input type="text" id="colFilterNotizen" class="col-filter"
-                                placeholder="Suchen..." onkeyup="aktualisiereAnsicht()"></th>
+                        <th style="width: 85px;">Datum<br><input type="text" id="colFilterDatum" class="col-filter" placeholder="Suchen..." onkeyup="aktualisiereAnsicht()"></th>
+                        <th>Start<br><input type="text" id="colFilterStart" class="col-filter" placeholder="Suchen..." onkeyup="aktualisiereAnsicht()"></th>
+                        <th>Ziel<br><input type="text" id="colFilterZiel" class="col-filter" placeholder="Suchen..." onkeyup="aktualisiereAnsicht()"></th>
+                        <th>Notizen<br><input type="text" id="colFilterNotizen" class="col-filter" placeholder="Suchen..." onkeyup="aktualisiereAnsicht()"></th>
                         <th style="width: 60px;">km</th>
                         <th style="width: 65px;">Kosten</th>
                         <th style="width: 140px;">Aktionen</th>
@@ -630,19 +234,18 @@
                 <div class="info-row"><span>Distanz:</span><strong id="infoDistanz">0 km</strong></div>
                 <div class="info-row"><span>Kosten:</span><strong id="infoKosten">0 €</strong></div>
                 <div class="form-group" style="margin-top: 10px;">
-                    <label>€ / km:</label><input type="number" step="0.01" id="kmPreis" value="0.30"
-                        onchange="aktualisiereAnsicht()">
+                    <label>€ / km:</label><input type="number" step="0.01" id="kmPreis" value="0.30" onchange="aktualisiereAnsicht()">
                 </div>
-
+                
                 <div style="display: flex; gap: 5px; margin-top: 15px;">
-                    <select id="shareFormat"
-                        style="padding: 10px; border: 1px solid #ccc; border-radius: 4px; background: white; font-weight: bold; color: #2c3e50;">
+                    <select id="shareFormat" style="padding: 10px; border: 1px solid #ccc; border-radius: 4px; background: white; font-weight: bold; color: #2c3e50;">
                         <option value="text">TXT</option>
                         <option value="csv">CSV</option>
                     </select>
-                    <button type="button" class="btn-share" style="flex-grow: 1;" onclick="teileFahrtenPerMail()">✉️
-                        Teilen</button>
+                    <button type="button" class="btn-share" style="flex-grow: 1;" onclick="teileFahrtenPerMail()">✉️ Teilen</button>
                 </div>
+                
+                <button type="button" class="btn-share" style="background-color: #f39c12; margin-top: 5px;" onclick="openBulkCopyModal()">🔁 Sichtbare duplizieren</button>
             </div>
 
             <div class="box">
@@ -663,9 +266,7 @@
     <div id="mapModal" class="map-modal">
         <div class="map-container">
             <div id="mapView"></div>
-            <button type="button" onclick="closeMapPicker()"
-                style="background:#e74c3c; padding: 15px; font-weight: bold; color:white; border:none; cursor:pointer;">Zurück
-                / Abbrechen</button>
+            <button type="button" onclick="closeMapPicker()" style="background:#e74c3c; padding: 15px; font-weight: bold; color:white; border:none; cursor:pointer;">Zurück / Abbrechen</button>
         </div>
     </div>
 
@@ -673,15 +274,15 @@
         const STORAGE_KEY = 'mein_fahrtenbuch_enc_daten';
         const SALT_KEY = 'mein_fahrtenbuch_salt';
         const SETTINGS_KEY = 'mein_fahrtenbuch_settings';
-
+        
         let fahrten = [];
         let aktuellGefilterteFahrten = [];
-        let inMemorySchluessel = null;
+        let inMemorySchluessel = null; 
 
         // --- BASIS KRYPTOGRAFIE ---
         function bufferToBase64(b) { return btoa(String.fromCharCode(...new Uint8Array(b))); }
         function base64ToBuffer(s) { return Uint8Array.from(atob(s), c => c.charCodeAt(0)).buffer; }
-
+        
         async function erstelleCryptoKey(passwort, saltBuffer) {
             const m = await crypto.subtle.importKey("raw", new TextEncoder().encode(passwort), "PBKDF2", false, ["deriveKey"]);
             return crypto.subtle.deriveKey({ name: "PBKDF2", salt: saltBuffer, iterations: 100000, hash: "SHA-256" }, m, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]);
@@ -717,7 +318,7 @@
 
                 inMemorySchluessel = await erstelleCryptoKey(pwd, saltBuffer);
                 const gespeicherteDaten = localStorage.getItem(STORAGE_KEY);
-
+                
                 if (gespeicherteDaten) {
                     const obj = JSON.parse(gespeicherteDaten);
                     try {
@@ -742,13 +343,13 @@
         // --- APP INITIALISIERUNG ---
         function initialisiereApp() {
             const s = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}');
-            if (s.apiAuswahl) document.getElementById('apiAuswahl').value = s.apiAuswahl;
-            if (s.apiKey) document.getElementById('apiKey').value = s.apiKey;
-            if (s.kmPreis) document.getElementById('kmPreis').value = s.kmPreis;
-
+            if(s.apiAuswahl) document.getElementById('apiAuswahl').value = s.apiAuswahl;
+            if(s.apiKey) document.getElementById('apiKey').value = s.apiKey;
+            if(s.kmPreis) document.getElementById('kmPreis').value = s.kmPreis;
+            
             document.getElementById('filterVon').value = getErsterTagDesMonats();
             document.getElementById('filterBis').value = getLetzterTagDesMonats();
-
+            
             aktualisiereAnsicht();
             toggleApiSettings();
         }
@@ -760,11 +361,11 @@
             localStorage.setItem(STORAGE_KEY, JSON.stringify({ iv: bufferToBase64(iv), data: bufferToBase64(enc) }));
         }
 
-        function formatLocalDatum(d) { return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; }
-        function getLetztesDatum() { if (!fahrten.length) return formatLocalDatum(new Date()); return formatLocalDatum(new Date(Math.max(...fahrten.map(f => new Date(f.datum))))); }
-        function getErstesDatum() { if (!fahrten.length) return formatLocalDatum(new Date()); return formatLocalDatum(new Date(Math.min(...fahrten.map(f => new Date(f.datum))))); }
+        function formatLocalDatum(d) { return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+        function getLetztesDatum() { if(!fahrten.length) return formatLocalDatum(new Date()); return formatLocalDatum(new Date(Math.max(...fahrten.map(f=>new Date(f.datum))))); }
+        function getErstesDatum() { if(!fahrten.length) return formatLocalDatum(new Date()); return formatLocalDatum(new Date(Math.min(...fahrten.map(f=>new Date(f.datum))))); }
         function getErsterTagDesMonats() { const d = new Date(); return formatLocalDatum(new Date(d.getFullYear(), d.getMonth(), 1)); }
-        function getLetzterTagDesMonats() { const d = new Date(); return formatLocalDatum(new Date(d.getFullYear(), d.getMonth() + 1, 0)); }
+        function getLetzterTagDesMonats() { const d = new Date(); return formatLocalDatum(new Date(d.getFullYear(), d.getMonth()+1, 0)); }
 
         function filterZuruecksetzen() {
             if (fahrten.length > 0) {
@@ -784,7 +385,7 @@
             currentTargetField = fieldId;
             document.getElementById('mapModal').style.display = 'flex';
             if (!pickerMap) {
-                pickerMap = L.map('mapView').setView([51.1, 10.4], 6);
+                pickerMap = L.map('mapView').setView([51.1, 10.4], 6); 
                 L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { maxZoom: 19 }).addTo(pickerMap);
                 pickerMap.on('click', async (e) => {
                     const { lat, lng } = e.latlng;
@@ -792,10 +393,10 @@
                     pickerMarker = L.marker([lat, lng]).addTo(pickerMap);
                     const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
                     const data = await res.json();
-                    if (data && data.display_name) { document.getElementById(currentTargetField).value = data.display_name; closeMapPicker(); }
+                    if(data && data.display_name) { document.getElementById(currentTargetField).value = data.display_name; closeMapPicker(); }
                 });
             }
-            setTimeout(() => { pickerMap.invalidateSize(); pickerMap.locate({ setView: true, maxZoom: 14 }); }, 100);
+            setTimeout(() => { pickerMap.invalidateSize(); pickerMap.locate({setView: true, maxZoom: 14}); }, 100);
         }
         function closeMapPicker() { document.getElementById('mapModal').style.display = 'none'; }
 
@@ -819,8 +420,8 @@
                     d = r.routes[0].distance / 1000;
                 } else if (m === 'google') {
                     const key = document.getElementById('apiKey').value;
-                    if (!window.google) await new Promise(res => { const sc = document.createElement('script'); sc.src = `https://maps.googleapis.com/maps/api/js?key=${key}`; sc.onload = res; document.head.appendChild(sc); });
-                    const res = await new Promise((res, rej) => new google.maps.DistanceMatrixService().getDistanceMatrix({ origins: [s], destinations: [z], travelMode: 'DRIVING' }, (r, st) => st == 'OK' ? res(r) : rej(st)));
+                    if(!window.google) await new Promise(res => { const sc = document.createElement('script'); sc.src = `https://maps.googleapis.com/maps/api/js?key=${key}`; sc.onload = res; document.head.appendChild(sc); });
+                    const res = await new Promise((res, rej) => new google.maps.DistanceMatrixService().getDistanceMatrix({origins:[s],destinations:[z],travelMode:'DRIVING'}, (r,st) => st=='OK'?res(r):rej(st)));
                     d = res.rows[0].elements[0].distance.value / 1000;
                 }
                 document.getElementById('distanz').value = d.toFixed(1);
@@ -836,7 +437,7 @@
             aktuellGefilterteFahrten = fahrten.filter(x => {
                 const deD = new Date(x.datum).toLocaleDateString('de-DE');
                 return (!v || x.datum >= v) && (!b || x.datum <= b) && (!fD || deD.includes(fD)) && (!fS || x.start.toLowerCase().includes(fS)) && (!fZ || x.ziel.toLowerCase().includes(fZ)) && (!fN || (x.notizen || "").toLowerCase().includes(fN));
-            }).sort((x, y) => new Date(y.datum) - new Date(x.datum));
+            }).sort((x,y) => new Date(y.datum) - new Date(x.datum));
 
             const tb = document.getElementById('tabelleBody'); tb.innerHTML = '';
             let sD = 0, sK = 0;
@@ -848,8 +449,8 @@
                     <td data-label="Start:">${x.start}</td>
                     <td data-label="Ziel:">${x.ziel}</td>
                     <td data-label="Notizen:">${x.notizen || '-'}</td>
-                    <td data-label="Distanz:">${x.distanz.toFixed(1).replace('.', ',')} km</td>
-                    <td data-label="Kosten:">${k.toFixed(2).replace('.', ',')} €</td>
+                    <td data-label="Distanz:">${x.distanz.toFixed(1).replace('.',',')} km</td>
+                    <td data-label="Kosten:">${k.toFixed(2).replace('.',',')} €</td>
                     <td data-label="" class="action-btns">
                         <button type="button" class="copy-btn" onclick="dupliziereFahrt(${x.id})">Kopie</button>
                         <button type="button" class="delete-btn" onclick="loescheFahrt(${x.id})">Löschen</button>
@@ -857,52 +458,127 @@
                 tb.appendChild(tr); sD += x.distanz; sK += k;
             });
             document.getElementById('infoAnzahl').innerText = aktuellGefilterteFahrten.length;
-            document.getElementById('infoDistanz').innerText = sD.toFixed(1).replace('.', ',') + ' km';
-            document.getElementById('infoKosten').innerText = sK.toFixed(2).replace('.', ',') + ' €';
-
+            document.getElementById('infoDistanz').innerText = sD.toFixed(1).replace('.',',') + ' km';
+            document.getElementById('infoKosten').innerText = sK.toFixed(2).replace('.',',') + ' €';
+            
             document.getElementById('datum').value = getLetztesDatum();
         }
 
         // --- AKTIONEN (mit TXT/CSV Logik) ---
         function teileFahrtenPerMail() {
             if (aktuellGefilterteFahrten.length === 0) return alert("Nichts zu teilen.");
-
+            
             const format = document.getElementById('shareFormat').value;
             const preisProKm = parseFloat(document.getElementById('kmPreis').value) || 0.30;
             let text = "";
 
             if (format === 'csv') {
-                // Deutsches CSV-Format (Semikolon als Trenner, Komma für Dezimalzahlen)
                 text = "Datum;Start;Ziel;Notizen;Distanz (km);Kosten (Euro)\n";
                 aktuellGefilterteFahrten.forEach(f => {
                     const deDatum = new Date(f.datum).toLocaleDateString('de-DE');
-                    // Anführungszeichen setzen und vorhandene Anführungszeichen maskieren
                     const start = `"${(f.start || '').replace(/"/g, '""')}"`;
                     const ziel = `"${(f.ziel || '').replace(/"/g, '""')}"`;
                     const notizen = `"${(f.notizen || '').replace(/"/g, '""')}"`;
                     const distanz = f.distanz.toFixed(1).replace('.', ',');
                     const kosten = (f.distanz * preisProKm).toFixed(2).replace('.', ',');
-
+                    
                     text += `${deDatum};${start};${ziel};${notizen};${distanz};${kosten}\n`;
                 });
             } else {
-                // Klassisches Text-Format
                 text = "Hier ist der Auszug:\n\n--- ZUSAMMENFASSUNG ---\n";
                 text += `Anzahl: ${document.getElementById('infoAnzahl').innerText}\nDistanz:  ${document.getElementById('infoDistanz').innerText}\nKosten:   ${document.getElementById('infoKosten').innerText}\n\n--- FAHRTEN ---\n`;
                 aktuellGefilterteFahrten.forEach(f => {
                     text += `${new Date(f.datum).toLocaleDateString('de-DE')} | ${f.start} -> ${f.ziel}\n`;
-                    if (f.notizen) text += `Zweck: ${f.notizen}\n`;
-                    text += `-> ${f.distanz.toFixed(1).replace('.', ',')} km (Kosten: ${(f.distanz * preisProKm).toFixed(2).replace('.', ',')} €)\n\n`;
+                    if(f.notizen) text += `Zweck: ${f.notizen}\n`;
+                    text += `-> ${f.distanz.toFixed(1).replace('.',',')} km (Kosten: ${(f.distanz * preisProKm).toFixed(2).replace('.',',')} €)\n\n`;
                 });
             }
 
             window.location.href = `mailto:?subject=${encodeURIComponent("Fahrtenbuch Auszug")}&body=${encodeURIComponent(text)}`;
         }
 
+        // --- NEU: BULK COPY LOGIK ---
+        let bulkOldStartDateObj = null;
+
+        function openBulkCopyModal() {
+            if (aktuellGefilterteFahrten.length === 0) return alert("Es gibt aktuell keine gefilterten Fahrten zum Duplizieren.");
+            
+            // Ältestes Datum aus den angezeigten Fahrten ermitteln
+            const daten = aktuellGefilterteFahrten.map(f => new Date(f.datum));
+            bulkOldStartDateObj = new Date(Math.min(...daten));
+            
+            document.getElementById('bulkCount').innerText = aktuellGefilterteFahrten.length;
+            document.getElementById('bulkOldStart').innerText = bulkOldStartDateObj.toLocaleDateString('de-DE');
+            
+            // Vorschlag: Genau 1 Woche (7 Tage) weiter
+            const vorschlagDatum = new Date(bulkOldStartDateObj);
+            vorschlagDatum.setDate(vorschlagDatum.getDate() + 7);
+            document.getElementById('bulkNewDate').value = formatLocalDatum(vorschlagDatum);
+            
+            document.getElementById('bulkModal').style.display = 'flex';
+        }
+
+        function closeBulkCopyModal() {
+            document.getElementById('bulkModal').style.display = 'none';
+        }
+
+        async function executeBulkCopy() {
+            const newDateStr = document.getElementById('bulkNewDate').value;
+            if (!newDateStr) return alert("Bitte wähle ein Startdatum.");
+            
+            const newStartDateObj = new Date(newDateStr);
+            
+            // Zeiten nullen, um Sommerzeit-Bugs bei der Tagesdifferenz zu vermeiden
+            bulkOldStartDateObj.setHours(0, 0, 0, 0);
+            newStartDateObj.setHours(0, 0, 0, 0);
+            
+            const diffTime = newStartDateObj.getTime() - bulkOldStartDateObj.getTime();
+            const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+            
+            let neueFahrten = [];
+            let baseId = Date.now();
+            
+            // Alle aktuell sichtbaren Fahrten iterieren und um "diffDays" in die Zukunft (oder Vergangenheit) verschieben
+            aktuellGefilterteFahrten.forEach((f, index) => {
+                const altesDatum = new Date(f.datum);
+                altesDatum.setHours(0, 0, 0, 0);
+                
+                const neuesDatum = new Date(altesDatum);
+                neuesDatum.setDate(neuesDatum.getDate() + diffDays);
+                
+                neueFahrten.push({
+                    id: baseId + index, // Eindeutige ID generieren
+                    datum: formatLocalDatum(neuesDatum),
+                    start: f.start,
+                    ziel: f.ziel,
+                    distanz: f.distanz,
+                    notizen: f.notizen
+                });
+            });
+            
+            // In die Haupt-Datenbank pushen
+            fahrten.push(...neueFahrten);
+            await speichereDaten();
+            
+            closeBulkCopyModal();
+            
+            // Filter anpassen, damit die neu erstellten Fahrten garantiert sofort sichtbar sind
+            const alleNeuDaten = neueFahrten.map(f => new Date(f.datum));
+            const maxNeuDatum = new Date(Math.max(...alleNeuDaten));
+            
+            const aktuellBis = new Date(document.getElementById('filterBis').value || "2000-01-01");
+            if (maxNeuDatum > aktuellBis) {
+                document.getElementById('filterBis').value = formatLocalDatum(maxNeuDatum);
+            }
+            
+            aktualisiereAnsicht();
+            alert(`Erfolg! ${neueFahrten.length} Fahrten wurden eingefügt.`);
+        }
+
         function dupliziereFahrt(id) {
             const f = fahrten.find(x => x.id === id);
             if (f) {
-                ['start', 'ziel', 'distanz', 'notizen'].forEach(k => document.getElementById(k).value = f[k] || '');
+                ['start','ziel','distanz','notizen'].forEach(k => document.getElementById(k).value = f[k] || '');
                 document.getElementById('datum').value = getLetztesDatum();
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }
@@ -911,10 +587,10 @@
         document.getElementById('fahrtForm').onsubmit = async (e) => {
             e.preventDefault();
             const fahrtDatum = document.getElementById('datum').value;
-            fahrten.push({ id: Date.now(), datum: fahrtDatum, start: document.getElementById('start').value, ziel: document.getElementById('ziel').value, distanz: parseFloat(document.getElementById('distanz').value.replace(',', '.')), notizen: document.getElementById('notizen').value });
+            fahrten.push({ id: Date.now(), datum: fahrtDatum, start: document.getElementById('start').value, ziel: document.getElementById('ziel').value, distanz: parseFloat(document.getElementById('distanz').value.replace(',','.')), notizen: document.getElementById('notizen').value });
             await speichereDaten();
-            ['distanz', 'start', 'ziel', 'notizen'].forEach(k => document.getElementById(k).value = '');
-
+            ['distanz','start','ziel','notizen'].forEach(k => document.getElementById(k).value = '');
+            
             const filterV = document.getElementById('filterVon').value;
             const filterB = document.getElementById('filterBis').value;
             if ((filterV && fahrtDatum < filterV) || (filterB && fahrtDatum > filterB)) {
@@ -924,18 +600,18 @@
             }
         };
 
-        async function loescheFahrt(id) {
-            if (confirm("Löschen?")) {
-                fahrten = fahrten.filter(x => x.id !== id);
-                await speichereDaten();
-                aktualisiereAnsicht();
-            }
+        async function loescheFahrt(id) { 
+            if(confirm("Löschen?")) { 
+                fahrten = fahrten.filter(x => x.id !== id); 
+                await speichereDaten(); 
+                aktualisiereAnsicht(); 
+            } 
         }
 
         // --- BACKUP (Dateiexport) ---
         async function exportDaten() {
-            const p = document.getElementById('backupPasswort').value || document.getElementById('masterPasswort').value;
-            if (!p) return alert("Passwort!");
+            const p = document.getElementById('backupPasswort').value || document.getElementById('masterPasswort').value; 
+            if(!p) return alert("Passwort!");
             const s = crypto.getRandomValues(new Uint8Array(16)), i = crypto.getRandomValues(new Uint8Array(12)), k = await erstelleCryptoKey(p, s);
             const e = await crypto.subtle.encrypt({ name: "AES-GCM", iv: i }, k, new TextEncoder().encode(JSON.stringify(fahrten)));
             const b = new Blob([JSON.stringify({ salt: bufferToBase64(s), iv: bufferToBase64(i), data: bufferToBase64(e) })], { type: "application/json" });
@@ -943,8 +619,8 @@
         }
 
         async function importDaten(ev) {
-            const p = document.getElementById('backupPasswort').value || document.getElementById('masterPasswort').value;
-            const f = ev.target.files[0]; if (!f || !p) return alert("Passwort für die Datei eingeben!");
+            const p = document.getElementById('backupPasswort').value || document.getElementById('masterPasswort').value; 
+            const f = ev.target.files[0]; if(!f || !p) return alert("Passwort für die Datei eingeben!");
             const reader = new FileReader();
             reader.onload = async (e) => {
                 try {
@@ -953,7 +629,7 @@
                     const list = JSON.parse(new TextDecoder().decode(dec));
                     let count = 0;
                     list.forEach(item => {
-                        const exists = fahrten.some(x => x.datum === item.datum && x.start === item.start && x.ziel === item.ziel && (x.notizen || "") === (item.notizen || ""));
+                        const exists = fahrten.some(x => x.datum === item.datum && x.start === item.start && x.ziel === item.ziel && (x.notizen||"") === (item.notizen||""));
                         if (!exists) { fahrten.push(item); count++; }
                     });
                     await speichereDaten(); aktualisiereAnsicht(); alert(count + " neue Fahrten.");
@@ -963,5 +639,4 @@
         }
     </script>
 </body>
-
 </html>
