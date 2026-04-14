@@ -44,7 +44,7 @@
         .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
         .full-width { grid-column: span 2; }
         
-        button { background-color: #27ae60; color: white; border: none; padding: 12px; border-radius: 4px; font-size: 15px; cursor: pointer; transition: background 0.3s; font-weight: bold; }
+        button { background-color: #27ae60; color: white; border: none; padding: 12px; border-radius: 4px; font-size: 15px; cursor: transition: background 0.3s; font-weight: bold; }
         button:hover { background-color: #2ecc71; }
         .btn-submit { grid-column: span 2; margin-top: 10px;}
         .btn-calc { background-color: #f39c12; grid-column: span 2; }
@@ -642,6 +642,8 @@
             const e = await crypto.subtle.encrypt({ name: "AES-GCM", iv: i }, k, new TextEncoder().encode(JSON.stringify(fahrten)));
             
             const b = new Blob([JSON.stringify({ salt: bufferToBase64(s), iv: bufferToBase64(i), data: bufferToBase64(e) })], { type: "text/plain" });
+            
+            // NEU: Dateiendung auf .txt geändert für Android Share API
             const dateiname = `Backup_${formatLocalDatum(new Date())}.txt`;
 
             try {
@@ -661,11 +663,13 @@
                 showToast("Share-Fehler: " + err.message, true);
             }
 
+            // FALLBACK zum normalen Download
             const a = document.createElement("a"); 
             a.href = URL.createObjectURL(b); 
             a.download = dateiname; 
             a.click();
-            //showToast("Backup heruntergeladen.");
+            // Optionales Success Toast (tritt nur im Fallback/am PC auf)
+            showToast("Backup heruntergeladen.");
         }
 
         async function importDaten(ev) {
