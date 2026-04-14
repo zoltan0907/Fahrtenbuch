@@ -608,14 +608,42 @@
             } 
         }
 
-        // --- BACKUP (Dateiexport) ---
+        // --- BACKUP (Dateiexport mit nativem Android/iOS Share-Menü) ---
         async function exportDaten() {
             const p = document.getElementById('backupPasswort').value || document.getElementById('masterPasswort').value; 
             if(!p) return alert("Passwort!");
-            const s = crypto.getRandomValues(new Uint8Array(16)), i = crypto.getRandomValues(new Uint8Array(12)), k = await erstelleCryptoKey(p, s);
+            
+            const s = crypto.getRandomValues(new Uint8Array(16));
+            const i = crypto.getRandomValues(new Uint8Array(12));
+            const k = await erstelleCryptoKey(p, s);
             const e = await crypto.subtle.encrypt({ name: "AES-GCM", iv: i }, k, new TextEncoder().encode(JSON.stringify(fahrten)));
-            const b = new Blob([JSON.stringify({ salt: bufferToBase64(s), iv: bufferToBase64(i), data: bufferToBase64(e) })], { type: "application/json" });
-            const a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = `Backup_${formatLocalDatum(new Date())}.enc`; a.click();
+            
+            const b = new Blob([JSON.stringify({ salt: bufferToBase64(s), iv: bufferToBase64(i), data: bufferToBase64(e) })], { type: "text/plain" });
+            const dateiname = `Backup_${formatLocalDatum(new Date())}.enc`;
+
+            // NEU: Versuch, das native Teilen-Menü des Handys zu öffnen (Web Share API)
+            try {
+                // Wir verpacken den Blob in eine echte "Datei"
+                const file = new File([b], dateiname, { type: "text/plain" });
+                
+                // Prüfen, ob das Handy das Teilen von Dateien unterstützt
+                if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                    await navigator.share({
+                        files: [file],
+                        title: 'Fahrtenbuch Backup'
+                    });
+                    return; // Wenn das klappt, brechen wir hier ab (kein normaler Download nötig)
+                }
+            } catch (err) {
+                // Passiert z.B., wenn du das Teilen-Menü auf dem Handy wegdrückst
+                console.log("Teilen abgebrochen oder nicht unterstützt. Fallback zum Download.");
+            }
+
+            // FALLBACK: Wenn das Teilen fehlschlägt (z.B. am Windows-PC), machen wir den normalen Download
+            const a = document.createElement("a"); 
+            a.href = URL.createObjectURL(b); 
+            a.download = dateiname; 
+            a.click();
         }
 
         async function importDaten(ev) {
