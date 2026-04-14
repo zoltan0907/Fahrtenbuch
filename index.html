@@ -88,6 +88,20 @@
         .login-box input { width: 100%; margin-bottom: 15px; font-size: 16px; padding: 12px; box-sizing: border-box; text-align: center; }
         .login-box button { width: 100%; font-size: 16px; padding: 12px; }
 
+        /* ========================================================
+           TOAST NOTIFICATION
+           ======================================================== */
+        #toast {
+            visibility: hidden; min-width: 250px; margin-left: -125px;
+            background-color: #333; color: #fff; text-align: center;
+            border-radius: 8px; padding: 16px; position: fixed; z-index: 10000;
+            left: 50%; bottom: 30px; font-size: 14px;
+            box-shadow: 0px 4px 6px rgba(0,0,0,0.3);
+            transition: visibility 0s, opacity 0.3s linear; opacity: 0;
+        }
+        #toast.show { visibility: visible; opacity: 1; }
+        #toast.error { background-color: #e74c3c; font-weight: bold; }
+
         /* Smartphone Optimierung */
         @media (max-width: 768px) {
             body { padding: 10px; }
@@ -117,6 +131,8 @@
     </style>
 </head>
 <body>
+
+    <div id="toast"></div>
 
     <div id="loginOverlay">
         <div class="login-box">
@@ -286,6 +302,17 @@
         async function erstelleCryptoKey(passwort, saltBuffer) {
             const m = await crypto.subtle.importKey("raw", new TextEncoder().encode(passwort), "PBKDF2", false, ["deriveKey"]);
             return crypto.subtle.deriveKey({ name: "PBKDF2", salt: saltBuffer, iterations: 100000, hash: "SHA-256" }, m, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]);
+        }
+
+        // --- TOAST FUNKTION ---
+        function showToast(msg, isError = false) {
+            const toast = document.getElementById("toast");
+            toast.innerText = msg;
+            if (isError) toast.classList.add("error");
+            else toast.classList.remove("error");
+
+            toast.classList.add("show");
+            setTimeout(function(){ toast.classList.remove("show"); }, 3500);
         }
 
         // --- ENTSPERREN LOGIK ---
@@ -497,20 +524,18 @@
             window.location.href = `mailto:?subject=${encodeURIComponent("Fahrtenbuch Auszug")}&body=${encodeURIComponent(text)}`;
         }
 
-        // --- NEU: BULK COPY LOGIK ---
+        // --- BULK COPY LOGIK ---
         let bulkOldStartDateObj = null;
 
         function openBulkCopyModal() {
             if (aktuellGefilterteFahrten.length === 0) return alert("Es gibt aktuell keine gefilterten Fahrten zum Duplizieren.");
             
-            // Ältestes Datum aus den angezeigten Fahrten ermitteln
             const daten = aktuellGefilterteFahrten.map(f => new Date(f.datum));
             bulkOldStartDateObj = new Date(Math.min(...daten));
             
             document.getElementById('bulkCount').innerText = aktuellGefilterteFahrten.length;
             document.getElementById('bulkOldStart').innerText = bulkOldStartDateObj.toLocaleDateString('de-DE');
             
-            // Vorschlag: Genau 1 Woche (7 Tage) weiter
             const vorschlagDatum = new Date(bulkOldStartDateObj);
             vorschlagDatum.setDate(vorschlagDatum.getDate() + 7);
             document.getElementById('bulkNewDate').value = formatLocalDatum(vorschlagDatum);
@@ -528,7 +553,6 @@
             
             const newStartDateObj = new Date(newDateStr);
             
-            // Zeiten nullen, um Sommerzeit-Bugs bei der Tagesdifferenz zu vermeiden
             bulkOldStartDateObj.setHours(0, 0, 0, 0);
             newStartDateObj.setHours(0, 0, 0, 0);
             
@@ -538,7 +562,6 @@
             let neueFahrten = [];
             let baseId = Date.now();
             
-            // Alle aktuell sichtbaren Fahrten iterieren und um "diffDays" in die Zukunft (oder Vergangenheit) verschieben
             aktuellGefilterteFahrten.forEach((f, index) => {
                 const altesDatum = new Date(f.datum);
                 altesDatum.setHours(0, 0, 0, 0);
@@ -547,7 +570,7 @@
                 neuesDatum.setDate(neuesDatum.getDate() + diffDays);
                 
                 neueFahrten.push({
-                    id: baseId + index, // Eindeutige ID generieren
+                    id: baseId + index,
                     datum: formatLocalDatum(neuesDatum),
                     start: f.start,
                     ziel: f.ziel,
@@ -556,13 +579,11 @@
                 });
             });
             
-            // In die Haupt-Datenbank pushen
             fahrten.push(...neueFahrten);
             await speichereDaten();
             
             closeBulkCopyModal();
             
-            // Filter anpassen, damit die neu erstellten Fahrten garantiert sofort sichtbar sind
             const alleNeuDaten = neueFahrten.map(f => new Date(f.datum));
             const maxNeuDatum = new Date(Math.max(...alleNeuDaten));
             
@@ -572,7 +593,7 @@
             }
             
             aktualisiereAnsicht();
-            alert(`Erfolg! ${neueFahrten.length} Fahrten wurden eingefügt.`);
+            showToast(`${neueFahrten.length} Fahrten wurden eingefügt.`);
         }
 
         function dupliziereFahrt(id) {
@@ -598,6 +619,7 @@
             } else {
                 aktualisiereAnsicht();
             }
+            showToast("Fahrt gespeichert.");
         };
 
         async function loescheFahrt(id) { 
@@ -605,10 +627,11 @@
                 fahrten = fahrten.filter(x => x.id !== id); 
                 await speichereDaten(); 
                 aktualisiereAnsicht(); 
+                showToast("Fahrt gelöscht.");
             } 
         }
 
-        // --- BACKUP (Dateiexport mit nativem Android/iOS Share-Menü) ---
+        // --- BACKUP (Dateiexport mit Toast-Debugging & Web Share API) ---
         async function exportDaten() {
             const p = document.getElementById('backupPasswort').value || document.getElementById('masterPasswort').value; 
             if(!p) return alert("Passwort!");
@@ -621,29 +644,28 @@
             const b = new Blob([JSON.stringify({ salt: bufferToBase64(s), iv: bufferToBase64(i), data: bufferToBase64(e) })], { type: "text/plain" });
             const dateiname = `Backup_${formatLocalDatum(new Date())}.enc`;
 
-            // NEU: Versuch, das native Teilen-Menü des Handys zu öffnen (Web Share API)
             try {
-                // Wir verpacken den Blob in eine echte "Datei"
                 const file = new File([b], dateiname, { type: "text/plain" });
                 
-                // Prüfen, ob das Handy das Teilen von Dateien unterstützt
                 if (navigator.canShare && navigator.canShare({ files: [file] })) {
                     await navigator.share({
                         files: [file],
                         title: 'Fahrtenbuch Backup'
                     });
-                    return; // Wenn das klappt, brechen wir hier ab (kein normaler Download nötig)
+                    showToast("Export erfolgreich geteilt!");
+                    return; 
+                } else {
+                    showToast("Browser blockiert File-Share (Fallback aktiv)", true);
                 }
             } catch (err) {
-                // Passiert z.B., wenn du das Teilen-Menü auf dem Handy wegdrückst
-                console.log("Teilen abgebrochen oder nicht unterstützt. Fallback zum Download.");
+                showToast("Share-Fehler: " + err.message, true);
             }
 
-            // FALLBACK: Wenn das Teilen fehlschlägt (z.B. am Windows-PC), machen wir den normalen Download
             const a = document.createElement("a"); 
             a.href = URL.createObjectURL(b); 
             a.download = dateiname; 
             a.click();
+            showToast("Backup heruntergeladen.");
         }
 
         async function importDaten(ev) {
@@ -660,8 +682,11 @@
                         const exists = fahrten.some(x => x.datum === item.datum && x.start === item.start && x.ziel === item.ziel && (x.notizen||"") === (item.notizen||""));
                         if (!exists) { fahrten.push(item); count++; }
                     });
-                    await speichereDaten(); aktualisiereAnsicht(); alert(count + " neue Fahrten.");
-                } catch (err) { alert("Fehler (falsches Passwort?)"); }
+                    await speichereDaten(); aktualisiereAnsicht(); 
+                    showToast(`${count} neue Fahrten importiert.`);
+                } catch (err) { 
+                    showToast("Fehler (falsches Passwort?)", true); 
+                }
             };
             reader.readAsText(f);
         }
