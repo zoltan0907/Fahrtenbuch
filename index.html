@@ -273,7 +273,7 @@
                 <button type="button" class="btn-export" onclick="exportDaten()">⬇️ Backup herunterladen</button>
                 <div class="file-input-wrapper">
                     <button type="button" class="btn-import">⬆️ Backup laden (Merge)</button>
-                    <input type="file" id="importFile" accept=".json,.enc" onchange="importDaten(event)">
+                    <input type="file" id="importFile" accept=".txt,.json,.enc" onchange="importDaten(event)">
                 </div>
             </div>
         </div>
@@ -642,7 +642,7 @@
             const e = await crypto.subtle.encrypt({ name: "AES-GCM", iv: i }, k, new TextEncoder().encode(JSON.stringify(fahrten)));
             
             const b = new Blob([JSON.stringify({ salt: bufferToBase64(s), iv: bufferToBase64(i), data: bufferToBase64(e) })], { type: "text/plain" });
-            const dateiname = `Backup_${formatLocalDatum(new Date())}.enc`;
+            const dateiname = `Backup_${formatLocalDatum(new Date())}.txt`;
 
             try {
                 const file = new File([b], dateiname, { type: "text/plain" });
