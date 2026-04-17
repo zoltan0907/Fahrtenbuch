@@ -44,9 +44,11 @@
         .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
         .full-width { grid-column: span 2; }
         
-        button { background-color: #27ae60; color: white; border: none; padding: 12px; border-radius: 4px; font-size: 15px; cursor: transition: background 0.3s; font-weight: bold; }
+        button { background-color: #27ae60; color: white; border: none; padding: 12px; border-radius: 4px; font-size: 15px; cursor: pointer; transition: background 0.3s; font-weight: bold; }
         button:hover { background-color: #2ecc71; }
-        .btn-submit { grid-column: span 2; margin-top: 10px;}
+        
+        .submit-group { grid-column: span 2; display: flex; gap: 10px; margin-top: 10px; }
+        .submit-group button { flex-grow: 1; }
         .btn-calc { background-color: #f39c12; grid-column: span 2; }
         
         /* Sidebar Buttons */
@@ -70,8 +72,12 @@
         th { background-color: #f8f9fa; color: #2c3e50; }
         .col-filter { width: 100%; padding: 5px; font-size: 11px; margin-top: 5px; border: 1px solid #bdc3c7; border-radius: 3px; box-sizing: border-box; }
         .action-btns { display: flex; gap: 5px; flex-wrap: wrap; width: 100%; }
-        .delete-btn { background-color: #e74c3c; padding: 6px 10px; font-size: 11px; margin: 0; }
-        .copy-btn { background-color: #3498db; padding: 6px 10px; font-size: 11px; margin: 0; }
+        
+        /* Table Action Buttons */
+        .edit-btn { background-color: #f39c12; padding: 6px 10px; font-size: 11px; margin: 0; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        .copy-btn { background-color: #3498db; padding: 6px 10px; font-size: 11px; margin: 0; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        .delete-btn { background-color: #e74c3c; padding: 6px 10px; font-size: 11px; margin: 0; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        
         .hidden { display: none !important; }
         .loading { font-size: 12px; color: #e67e22; margin-top: 5px; font-weight: bold; }
 
@@ -108,7 +114,6 @@
             .container { display: flex; flex-direction: column; }
             .form-grid { display: flex !important; flex-direction: column !important; gap: 15px; }
             .form-group { width: 100%; margin: 0; }
-            .btn-submit, .btn-calc { width: 100%; margin-top: 5px; }
             
             .table-controls { flex-direction: column; align-items: stretch; gap: 10px; }
             .btn-reset { margin-top: 5px; }
@@ -193,9 +198,14 @@
                         <label>Notizen</label>
                         <textarea id="notizen" placeholder="Zweck der Fahrt, Tanken, etc."></textarea>
                     </div>
+                    
                     <button type="button" class="btn-calc" id="btnBerechnen" onclick="berechneRoute()">📍 Distanz automatisch berechnen</button>
                     <div id="calcStatus" class="loading hidden">Berechne Route...</div>
-                    <button type="submit" class="btn-submit">💾 Fahrt speichern</button>
+                    
+                    <div class="submit-group">
+                        <button type="button" id="cancelEditBtn" class="hidden" onclick="abbrechenBearbeiten()" style="background-color: #e74c3c;">❌ Abbrechen</button>
+                        <button type="submit" class="btn-submit" id="submitBtn">💾 Fahrt speichern</button>
+                    </div>
                 </div>
             </form>
 
@@ -220,7 +230,7 @@
                         <th>Notizen<br><input type="text" id="colFilterNotizen" class="col-filter" placeholder="Suchen..." onkeyup="aktualisiereAnsicht()"></th>
                         <th style="width: 60px;">km</th>
                         <th style="width: 65px;">Kosten</th>
-                        <th style="width: 140px;">Aktionen</th>
+                        <th style="width: 170px;">Aktionen</th>
                     </tr>
                 </thead>
                 <tbody id="tabelleBody"></tbody>
@@ -294,6 +304,7 @@
         let fahrten = [];
         let aktuellGefilterteFahrten = [];
         let inMemorySchluessel = null; 
+        let editId = null; // NEU: Trackt ob wir gerade eine Fahrt bearbeiten
 
         // --- BASIS KRYPTOGRAFIE ---
         function bufferToBase64(b) { return btoa(String.fromCharCode(...new Uint8Array(b))); }
@@ -471,6 +482,7 @@
             aktuellGefilterteFahrten.forEach(x => {
                 const k = x.distanz * p;
                 const tr = document.createElement('tr');
+                // NEU: Edit-Button hinzugefügt
                 tr.innerHTML = `
                     <td data-label="Datum:">${new Date(x.datum).toLocaleDateString('de-DE')}</td>
                     <td data-label="Start:">${x.start}</td>
@@ -479,6 +491,7 @@
                     <td data-label="Distanz:">${x.distanz.toFixed(1).replace('.',',')} km</td>
                     <td data-label="Kosten:">${k.toFixed(2).replace('.',',')} €</td>
                     <td data-label="" class="action-btns">
+                        <button type="button" class="edit-btn" onclick="bearbeiteFahrt(${x.id})">Edit</button>
                         <button type="button" class="copy-btn" onclick="dupliziereFahrt(${x.id})">Kopie</button>
                         <button type="button" class="delete-btn" onclick="loescheFahrt(${x.id})">Löschen</button>
                     </td>`;
@@ -488,7 +501,8 @@
             document.getElementById('infoDistanz').innerText = sD.toFixed(1).replace('.',',') + ' km';
             document.getElementById('infoKosten').innerText = sK.toFixed(2).replace('.',',') + ' €';
             
-            document.getElementById('datum').value = getLetztesDatum();
+            // Nur das Datum updaten, wenn wir gerade NICHT im Edit-Modus sind
+            if(editId === null) document.getElementById('datum').value = getLetztesDatum();
         }
 
         // --- AKTIONEN (mit TXT/CSV Logik) ---
@@ -596,7 +610,11 @@
             showToast(`${neueFahrten.length} Fahrten wurden eingefügt.`);
         }
 
+        // --- BEARBEITEN & DUPLIZIEREN ---
         function dupliziereFahrt(id) {
+            // Falls man im Edit-Modus auf Kopieren klickt, Edit vorher abbrechen
+            if (editId !== null) abbrechenBearbeiten();
+            
             const f = fahrten.find(x => x.id === id);
             if (f) {
                 ['start','ziel','distanz','notizen'].forEach(k => document.getElementById(k).value = f[k] || '');
@@ -605,13 +623,78 @@
             }
         }
 
+        function bearbeiteFahrt(id) {
+            const f = fahrten.find(x => x.id === id);
+            if (f) {
+                document.getElementById('datum').value = f.datum || '';
+                document.getElementById('start').value = f.start || '';
+                document.getElementById('ziel').value = f.ziel || '';
+                document.getElementById('distanz').value = f.distanz || '';
+                document.getElementById('notizen').value = f.notizen || '';
+                
+                editId = id;
+                document.getElementById('formTitle').innerText = "Fahrt bearbeiten";
+                
+                const submitBtn = document.getElementById('submitBtn');
+                submitBtn.innerHTML = "💾 Änderungen speichern";
+                
+                document.getElementById('cancelEditBtn').classList.remove('hidden');
+                
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        function abbrechenBearbeiten() {
+            editId = null;
+            ['distanz','start','ziel','notizen'].forEach(k => document.getElementById(k).value = '');
+            document.getElementById('datum').value = getLetztesDatum();
+            
+            document.getElementById('formTitle').innerText = "Neue Fahrt eintragen";
+            
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.innerHTML = "💾 Fahrt speichern";
+            
+            document.getElementById('cancelEditBtn').classList.add('hidden');
+        }
+
+        // --- FORMULAR ABSENDEN (Neu & Edit) ---
         document.getElementById('fahrtForm').onsubmit = async (e) => {
             e.preventDefault();
             const fahrtDatum = document.getElementById('datum').value;
-            fahrten.push({ id: Date.now(), datum: fahrtDatum, start: document.getElementById('start').value, ziel: document.getElementById('ziel').value, distanz: parseFloat(document.getElementById('distanz').value.replace(',','.')), notizen: document.getElementById('notizen').value });
-            await speichereDaten();
-            ['distanz','start','ziel','notizen'].forEach(k => document.getElementById(k).value = '');
+            const startVal = document.getElementById('start').value;
+            const zielVal = document.getElementById('ziel').value;
+            const distanzVal = parseFloat(document.getElementById('distanz').value.replace(',','.'));
+            const notizenVal = document.getElementById('notizen').value;
+
+            if (editId !== null) {
+                // Bestehende Fahrt aktualisieren
+                const index = fahrten.findIndex(x => x.id === editId);
+                if (index !== -1) {
+                    fahrten[index].datum = fahrtDatum;
+                    fahrten[index].start = startVal;
+                    fahrten[index].ziel = zielVal;
+                    fahrten[index].distanz = distanzVal;
+                    fahrten[index].notizen = notizenVal;
+                }
+                showToast("Fahrt aktualisiert.");
+                abbrechenBearbeiten(); // Setzt das Formular zurück
+            } else {
+                // Neue Fahrt speichern
+                fahrten.push({ 
+                    id: Date.now(), 
+                    datum: fahrtDatum, 
+                    start: startVal, 
+                    ziel: zielVal, 
+                    distanz: distanzVal, 
+                    notizen: notizenVal 
+                });
+                ['distanz','start','ziel','notizen'].forEach(k => document.getElementById(k).value = '');
+                showToast("Fahrt gespeichert.");
+            }
             
+            await speichereDaten();
+            
+            // Ansicht/Filter anpassen
             const filterV = document.getElementById('filterVon').value;
             const filterB = document.getElementById('filterBis').value;
             if ((filterV && fahrtDatum < filterV) || (filterB && fahrtDatum > filterB)) {
@@ -619,12 +702,15 @@
             } else {
                 aktualisiereAnsicht();
             }
-            showToast("Fahrt gespeichert.");
         };
 
         async function loescheFahrt(id) { 
             if(confirm("Löschen?")) { 
                 fahrten = fahrten.filter(x => x.id !== id); 
+                
+                // Falls die gerade zu bearbeitende Fahrt gelöscht wird, Formular leeren
+                if (editId === id) abbrechenBearbeiten();
+                
                 await speichereDaten(); 
                 aktualisiereAnsicht(); 
                 showToast("Fahrt gelöscht.");
@@ -643,7 +729,6 @@
             
             const b = new Blob([JSON.stringify({ salt: bufferToBase64(s), iv: bufferToBase64(i), data: bufferToBase64(e) })], { type: "text/plain" });
             
-            // NEU: Dateiendung auf .txt geändert für Android Share API
             const dateiname = `Backup_${formatLocalDatum(new Date())}.txt`;
 
             try {
@@ -663,12 +748,10 @@
                 showToast("Share-Fehler: " + err.message, true);
             }
 
-            // FALLBACK zum normalen Download
             const a = document.createElement("a"); 
             a.href = URL.createObjectURL(b); 
             a.download = dateiname; 
             a.click();
-            // Optionales Success Toast (tritt nur im Fallback/am PC auf)
             showToast("Backup heruntergeladen.");
         }
 
