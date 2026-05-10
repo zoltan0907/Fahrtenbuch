@@ -146,22 +146,40 @@
            ======================================================== */
         @media print {
             @page { margin: 1.5cm; }
-            body { background: white; padding: 0; color: black; font-size: 11pt; }
+            body { background: white; padding: 0; color: black; font-size: 10pt; }
             
             /* Unsichtbar machen: Sidebar, Formular, Filter, Aktionen-Spalte */
             .sidebar, .table-controls, #fahrtForm, #formTitle, .action-btns, 
             th:last-child, td:last-child, h1 { display: none !important; }
             
             /* Container und Tabelle auf volle Seitenbreite ausdehnen */
-            .container { display: block; width: 100%; max-width: 100%; }
+            .container { display: block; width: 100%; max-width: 100%; margin: 0; padding: 0; }
             .main-content { box-shadow: none; padding: 0; border: none; }
             
-            table { border-collapse: collapse; width: 100%; margin-top: 15px; display: table !important; }
-            thead, tbody, tr { display: table-row-group !important; }
-            tr { display: table-row !important; page-break-inside: avoid; }
-            th, td { display: table-cell !important; border: 1px solid #000 !important; padding: 8px !important; text-align: left; font-size: 11pt; }
-            th { background-color: #f0f0f0 !important; color: #000 !important; }
+            /* Tabellen-Layout strikt für den Druck reparieren (überschreibt mobile Ansicht) */
+            table { border-collapse: collapse; width: 100%; margin-top: 15px; display: table !important; table-layout: fixed !important; }
+            thead { display: table-header-group !important; }
+            tbody { display: table-row-group !important; }
+            tr { display: table-row !important; page-break-inside: avoid; border: none !important; box-shadow: none !important; margin: 0 !important; padding: 0 !important; }
+            th, td { display: table-cell !important; border: 1px solid #000 !important; padding: 8px !important; text-align: left !important; font-size: 10pt !important; }
+            th { background-color: #f0f0f0 !important; color: #000 !important; border-bottom: 2px solid #000 !important; }
+            
+            /* Mobile Label-Texte in der Tabelle ausblenden */
+            td::before { display: none !important; content: '' !important; }
+            
+            /* Versteckte mobile Spalten (km, Kosten) für den Druck wieder einblenden */
+            th:nth-child(5), th:nth-child(6), td:nth-child(5), td:nth-child(6) { display: table-cell !important; }
+            
+            /* Filter in den Spaltenköpfen ausblenden */
             th br, .col-filter { display: none !important; }
+            
+            /* Spaltenbreiten vernünftig verteilen */
+            th:nth-child(1) { width: 12% !important; } /* Datum */
+            th:nth-child(2) { width: 25% !important; } /* Start */
+            th:nth-child(3) { width: 25% !important; } /* Ziel */
+            th:nth-child(4) { width: 20% !important; } /* Notizen */
+            th:nth-child(5) { width: 8% !important; }  /* km */
+            th:nth-child(6) { width: 10% !important; } /* Kosten */
             
             /* Spezielle Anzeige nur für den Druck (Überschrift + Auswertung) */
             #printSummary.hidden { display: block !important; margin-bottom: 20px; }
