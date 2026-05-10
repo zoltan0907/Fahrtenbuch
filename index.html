@@ -540,6 +540,12 @@
             const v = document.getElementById('filterVon').value, b = document.getElementById('filterBis').value, p = parseFloat(document.getElementById('kmPreis').value);
             const fD = document.getElementById('colFilterDatum').value.toLowerCase(), fS = document.getElementById('colFilterStart').value.toLowerCase(), fZ = document.getElementById('colFilterZiel').value.toLowerCase(), fN = document.getElementById('colFilterNotizen').value.toLowerCase();
 
+        let anzeigeZeitraum = "Gesamter Zeitraum";
+        if(v && b) anzeigeZeitraum = `${new Date(v).toLocaleDateString('de-DE')} bis ${new Date(b).toLocaleDateString('de-DE')}`;
+        else if (v) anzeigeZeitraum = `Ab ${new Date(v).toLocaleDateString('de-DE')}`;
+        else if (b) anzeigeZeitraum = `Bis ${new Date(b).toLocaleDateString('de-DE')}`;
+        document.title = `Fahrtenbuch - ${anzeigeZeitraum}`;
+
             aktuellGefilterteFahrten = fahrten.filter(x => {
                 const deD = new Date(x.datum).toLocaleDateString('de-DE');
                 return (!v || x.datum >= v) && (!b || x.datum <= b) && (!fD || deD.includes(fD)) && (!fS || x.start.toLowerCase().includes(fS)) && (!fZ || x.ziel.toLowerCase().includes(fZ)) && (!fN || (x.notizen || "").toLowerCase().includes(fN));
@@ -593,7 +599,13 @@
                 document.getElementById('printDistanz').innerText = document.getElementById('infoDistanz').innerText;
                 document.getElementById('printKosten').innerText = document.getElementById('infoKosten').innerText;
 
+                // Temporär den Dokumententitel für den PDF-Dateinamen anpassen
+                const originalTitle = document.title;
+                document.title = `Fahrtenbuch - ${anzeigeZeitraum}`;
+
                 window.print();
+                
+                document.title = originalTitle;
                 return;
             }
 
