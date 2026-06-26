@@ -28,9 +28,12 @@
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; color: #333; }
         h1 { text-align: center; color: #2c3e50; }
-        .container { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr 320px; gap: 20px; }
         
+        /* Layout Grid */
+        .container { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr 320px; gap: 20px; align-items: start; }
+        .main-column { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
         .sidebar { display: flex; flex-direction: column; gap: 20px; position: sticky; top: 20px; }
+        
         .box { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .box h3 { margin-top: 0; border-bottom: 2px solid #3498db; padding-bottom: 10px; font-size: 18px; }
         .info-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 15px; }
@@ -65,7 +68,7 @@
         .file-input-wrapper input[type=file] { font-size: 100px; position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; height: 100%; }
         
         /* Filter-Leiste */
-        .table-controls { display: flex; gap: 15px; align-items: flex-end; background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #ddd; margin-top: 30px; margin-bottom: 10px; }
+        .table-controls { display: flex; gap: 15px; align-items: flex-end; background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #ddd; margin-bottom: 10px; }
         .table-filter-group { display: flex; flex-direction: column; flex-grow: 1; }
         .table-filter-group label { margin-bottom: 5px; font-size: 13px; font-weight: bold; color: #2c3e50; }
         .btn-reset { background-color: #95a5a6; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; height: 42px; font-size: 14px; font-weight: bold;}
@@ -118,7 +121,12 @@
            ======================================================== */
         @media (max-width: 768px) {
             body { padding: 10px; }
-            .container { display: flex; flex-direction: column; }
+            
+            /* Magic Layout Switch: Sidebar ordnet sich zwischen Formular und Tabelle ein! */
+            .container { display: flex; flex-direction: column; gap: 20px; }
+            .main-column { display: contents; } /* Löst den Wrapper auf */
+            .sidebar { position: static; } /* Sidebar klebt nicht mehr am oberen Rand */
+            
             .form-grid { display: flex !important; flex-direction: column !important; gap: 15px; }
             .form-group { width: 100%; margin: 0; }
             
@@ -153,7 +161,8 @@
             th:last-child, td:last-child, h1 { display: none !important; }
             
             /* Container und Tabelle auf volle Seitenbreite ausdehnen */
-            .container { display: block !important; width: 100% !important; max-width: 100% !important; margin: 0; padding: 0; }
+            .container { display: block; width: 100%; max-width: 100%; margin: 0; padding: 0; }
+            .main-column { display: block; }
             .main-content { box-shadow: none; padding: 0; border: none; }
             
             /* Tabellen-Layout strikt für den Druck reparieren (überschreibt mobile Ansicht) */
@@ -223,88 +232,102 @@
     <h1>🚗 Mein lokales Fahrtenbuch</h1>
 
     <div class="container" id="appContainer" style="display: none;">
-        <div class="main-content">
+        
+        <!-- LINKE SPALTE (Auf Desktop) -->
+        <div class="main-column">
             
-            <!-- NEU: Wird NUR beim Drucken/PDF-Export sichtbar -->
-            <div id="printSummary" class="hidden">
-                <h2>Fahrtenbuch Auszug</h2>
-                <p style="font-size: 12pt;">Zeitraum: <strong id="printZeitraum"></strong></p>
-                <div style="display: flex; gap: 30px; font-size: 12pt; margin-top: 10px;">
-                    <span>Einträge: <strong id="printAnzahl"></strong></span>
-                    <span>Gesamtdistanz: <strong id="printDistanz"></strong></span>
-                    <span>Gesamtkosten: <strong id="printKosten"></strong></span>
+            <!-- FORMULAR BLOCK -->
+            <!-- Auf dem Smartphone rutscht dies auf Position 1 (Ganz oben) -->
+            <div class="main-content" style="order: 1;">
+                
+                <!-- Wird NUR beim Drucken/PDF-Export sichtbar -->
+                <div id="printSummary" class="hidden">
+                    <h2>Fahrtenbuch Auszug</h2>
+                    <p style="font-size: 12pt;">Zeitraum: <strong id="printZeitraum"></strong></p>
+                    <div style="display: flex; gap: 30px; font-size: 12pt; margin-top: 10px;">
+                        <span>Einträge: <strong id="printAnzahl"></strong></span>
+                        <span>Gesamtdistanz: <strong id="printDistanz"></strong></span>
+                        <span>Gesamtkosten: <strong id="printKosten"></strong></span>
+                    </div>
                 </div>
-            </div>
 
-            <h3 id="formTitle">Neue Fahrt eintragen</h3>
-            <form id="fahrtForm">
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label>Datum</label>
-                        <input type="date" id="datum" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Distanz (km)</label>
-                        <input type="number" step="0.1" id="distanz" placeholder="z.B. 25.5" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Startadresse</label>
-                        <div class="input-with-btn">
-                            <input type="text" id="start" placeholder="Tippen oder 📍" required ondblclick="openMapPicker('start')">
-                            <button type="button" class="btn-icon" onclick="openMapPicker('start')">📍</button>
+                <h3 id="formTitle">Neue Fahrt eintragen</h3>
+                <form id="fahrtForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Datum</label>
+                            <input type="date" id="datum" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Distanz (km)</label>
+                            <input type="number" step="0.1" id="distanz" placeholder="z.B. 25.5" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Startadresse</label>
+                            <div class="input-with-btn">
+                                <input type="text" id="start" placeholder="Tippen oder 📍" required ondblclick="openMapPicker('start')">
+                                <button type="button" class="btn-icon" onclick="openMapPicker('start')">📍</button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Zieladresse</label>
+                            <div class="input-with-btn">
+                                <input type="text" id="ziel" placeholder="Tippen oder 📍" required ondblclick="openMapPicker('ziel')">
+                                <button type="button" class="btn-icon" onclick="openMapPicker('ziel')">📍</button>
+                            </div>
+                        </div>
+                        <div class="form-group full-width">
+                            <label>Notizen</label>
+                            <textarea id="notizen" placeholder="Zweck der Fahrt, Tanken, etc."></textarea>
+                        </div>
+                        
+                        <button type="button" class="btn-calc" id="btnBerechnen" onclick="berechneRoute()">📍 Distanz automatisch berechnen</button>
+                        <div id="calcStatus" class="loading hidden">Berechne Route...</div>
+                        
+                        <div class="submit-group">
+                            <button type="button" id="cancelEditBtn" class="hidden" onclick="abbrechenBearbeiten()" style="background-color: #e74c3c;">❌ Abbrechen</button>
+                            <button type="submit" class="btn-submit" id="submitBtn">💾 Fahrt speichern</button>
                         </div>
                     </div>
-                    <div class="form-group">
-                        <label>Zieladresse</label>
-                        <div class="input-with-btn">
-                            <input type="text" id="ziel" placeholder="Tippen oder 📍" required ondblclick="openMapPicker('ziel')">
-                            <button type="button" class="btn-icon" onclick="openMapPicker('ziel')">📍</button>
-                        </div>
-                    </div>
-                    <div class="form-group full-width">
-                        <label>Notizen</label>
-                        <textarea id="notizen" placeholder="Zweck der Fahrt, Tanken, etc."></textarea>
-                    </div>
-                    
-                    <button type="button" class="btn-calc" id="btnBerechnen" onclick="berechneRoute()">📍 Distanz automatisch berechnen</button>
-                    <div id="calcStatus" class="loading hidden">Berechne Route...</div>
-                    
-                    <div class="submit-group">
-                        <button type="button" id="cancelEditBtn" class="hidden" onclick="abbrechenBearbeiten()" style="background-color: #e74c3c;">❌ Abbrechen</button>
-                        <button type="submit" class="btn-submit" id="submitBtn">💾 Fahrt speichern</button>
-                    </div>
-                </div>
-            </form>
-
-            <div class="table-controls">
-                <div class="table-filter-group">
-                    <label>📅 Liste filtern von:</label>
-                    <input type="date" id="filterVon" onchange="aktualisiereAnsicht()">
-                </div>
-                <div class="table-filter-group">
-                    <label>bis:</label>
-                    <input type="date" id="filterBis" onchange="aktualisiereAnsicht()">
-                </div>
-                <button type="button" class="btn-reset" onclick="filterZuruecksetzen()">Alles anzeigen</button>
+                </form>
             </div>
 
-            <table id="fahrtenTabelle">
-                <thead>
-                    <tr>
-                        <th style="width: 85px;">Datum<br><input type="text" id="colFilterDatum" class="col-filter" placeholder="Suchen..." onkeyup="aktualisiereAnsicht()"></th>
-                        <th>Start<br><input type="text" id="colFilterStart" class="col-filter" placeholder="Suchen..." onkeyup="aktualisiereAnsicht()"></th>
-                        <th>Ziel<br><input type="text" id="colFilterZiel" class="col-filter" placeholder="Suchen..." onkeyup="aktualisiereAnsicht()"></th>
-                        <th>Notizen<br><input type="text" id="colFilterNotizen" class="col-filter" placeholder="Suchen..." onkeyup="aktualisiereAnsicht()"></th>
-                        <th style="width: 60px;">km</th>
-                        <th style="width: 65px;">Kosten</th>
-                        <th style="width: 170px;">Aktionen</th>
-                    </tr>
-                </thead>
-                <tbody id="tabelleBody"></tbody>
-            </table>
+            <!-- TABELLEN BLOCK -->
+            <!-- Auf dem Smartphone rutscht dies auf Position 3 (Ganz unten) -->
+            <div class="main-content" style="order: 3;">
+                <div class="table-controls">
+                    <div class="table-filter-group">
+                        <label>📅 Liste filtern von:</label>
+                        <input type="date" id="filterVon" onchange="aktualisiereAnsicht()">
+                    </div>
+                    <div class="table-filter-group">
+                        <label>bis:</label>
+                        <input type="date" id="filterBis" onchange="aktualisiereAnsicht()">
+                    </div>
+                    <button type="button" class="btn-reset" onclick="filterZuruecksetzen()">Alles anzeigen</button>
+                </div>
+
+                <table id="fahrtenTabelle">
+                    <thead>
+                        <tr>
+                            <th style="width: 85px;">Datum<br><input type="text" id="colFilterDatum" class="col-filter" placeholder="Suchen..." onkeyup="aktualisiereAnsicht()"></th>
+                            <th>Start<br><input type="text" id="colFilterStart" class="col-filter" placeholder="Suchen..." onkeyup="aktualisiereAnsicht()"></th>
+                            <th>Ziel<br><input type="text" id="colFilterZiel" class="col-filter" placeholder="Suchen..." onkeyup="aktualisiereAnsicht()"></th>
+                            <th>Notizen<br><input type="text" id="colFilterNotizen" class="col-filter" placeholder="Suchen..." onkeyup="aktualisiereAnsicht()"></th>
+                            <th style="width: 60px;">km</th>
+                            <th style="width: 65px;">Kosten</th>
+                            <th style="width: 170px;">Aktionen</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelleBody"></tbody>
+                </table>
+            </div>
+
         </div>
 
-        <div class="sidebar">
+        <!-- RECHTE SPALTE (SIDEBAR) -->
+        <!-- Auf dem Smartphone rutscht dies auf Position 2 (Zwischen Formular und Tabelle) -->
+        <div class="sidebar" style="order: 2;">
             <div class="box">
                 <h3>⚙️ Routing Engine</h3>
                 <div class="form-group">
@@ -540,12 +563,6 @@
             const v = document.getElementById('filterVon').value, b = document.getElementById('filterBis').value, p = parseFloat(document.getElementById('kmPreis').value);
             const fD = document.getElementById('colFilterDatum').value.toLowerCase(), fS = document.getElementById('colFilterStart').value.toLowerCase(), fZ = document.getElementById('colFilterZiel').value.toLowerCase(), fN = document.getElementById('colFilterNotizen').value.toLowerCase();
 
-        let anzeigeZeitraum = "Gesamter Zeitraum";
-        if(v && b) anzeigeZeitraum = `${new Date(v).toLocaleDateString('de-DE')} bis ${new Date(b).toLocaleDateString('de-DE')}`;
-        else if (v) anzeigeZeitraum = `Ab ${new Date(v).toLocaleDateString('de-DE')}`;
-        else if (b) anzeigeZeitraum = `Bis ${new Date(b).toLocaleDateString('de-DE')}`;
-        document.title = `Fahrtenbuch - ${anzeigeZeitraum}`;
-
             aktuellGefilterteFahrten = fahrten.filter(x => {
                 const deD = new Date(x.datum).toLocaleDateString('de-DE');
                 return (!v || x.datum >= v) && (!b || x.datum <= b) && (!fD || deD.includes(fD)) && (!fS || x.start.toLowerCase().includes(fS)) && (!fZ || x.ziel.toLowerCase().includes(fZ)) && (!fN || (x.notizen || "").toLowerCase().includes(fN));
@@ -599,13 +616,7 @@
                 document.getElementById('printDistanz').innerText = document.getElementById('infoDistanz').innerText;
                 document.getElementById('printKosten').innerText = document.getElementById('infoKosten').innerText;
 
-                // Temporär den Dokumententitel für den PDF-Dateinamen anpassen
-                const originalTitle = document.title;
-                document.title = `Fahrtenbuch - ${anzeigeZeitraum}`;
-
                 window.print();
-                
-                document.title = originalTitle;
                 return;
             }
 
