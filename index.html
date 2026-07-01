@@ -35,7 +35,7 @@
         .sidebar { display: flex; flex-direction: column; gap: 20px; position: sticky; top: 20px; }
         
         .box { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .box h3 { margin-top: 0; border-bottom: 2px solid #3498db; padding-bottom: 10px; font-size: 18px; }
+        .box h3 { margin-top: 0; border-bottom: 2px solid #3498db; padding-bottom: 10px; font-size: 18px; display: flex; justify-content: space-between; align-items: center; }
         .info-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 15px; }
         .info-row strong { color: #2980b9; }
         
@@ -62,10 +62,18 @@
         /* Sidebar Buttons */
         .btn-share { background-color: #3498db; width: 100%; margin-top: 0; }
         .btn-share:hover { background-color: #2980b9; }
-        .btn-export { background-color: #8e44ad; width: 100%; margin-bottom: 10px; }
+        .btn-export { background-color: #8e44ad; width: 100%; margin-bottom: 10px; transition: all 0.3s; }
         .btn-import { background-color: #2c3e50; width: 100%; }
         .file-input-wrapper { position: relative; overflow: hidden; display: inline-block; width: 100%; }
         .file-input-wrapper input[type=file] { font-size: 100px; position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; height: 100%; }
+
+        /* Animation für ungesichertes Backup */
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7); background-color: #e74c3c; }
+            70% { box-shadow: 0 0 0 10px rgba(231, 76, 60, 0); background-color: #c0392b; }
+            100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); background-color: #e74c3c; }
+        }
+        .btn-needs-backup { animation: pulse-red 2s infinite !important; }
         
         /* Filter-Leiste */
         .table-controls { display: flex; gap: 15px; align-items: flex-end; background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #ddd; margin-bottom: 10px; }
@@ -121,11 +129,9 @@
            ======================================================== */
         @media (max-width: 768px) {
             body { padding: 10px; }
-            
-            /* Magic Layout Switch: Sidebar ordnet sich zwischen Formular und Tabelle ein! */
             .container { display: flex; flex-direction: column; gap: 20px; }
-            .main-column { display: contents; } /* Löst den Wrapper auf */
-            .sidebar { position: static; } /* Sidebar klebt nicht mehr am oberen Rand */
+            .main-column { display: contents; } 
+            .sidebar { position: static; } 
             
             .form-grid { display: flex !important; flex-direction: column !important; gap: 15px; }
             .form-group { width: 100%; margin: 0; }
@@ -155,42 +161,21 @@
         @media print {
             @page { margin: 1.5cm; }
             body { background: white; padding: 0; color: black; font-size: 10pt; }
-            
-            /* Unsichtbar machen: Sidebar, Formular, Filter, Aktionen-Spalte */
-            .sidebar, .table-controls, #fahrtForm, #formTitle, .action-btns, 
-            th:last-child, td:last-child, h1 { display: none !important; }
-            
-            /* Container und Tabelle auf volle Seitenbreite ausdehnen */
+            .sidebar, .table-controls, #fahrtForm, #formTitle, .action-btns, th:last-child, td:last-child, h1 { display: none !important; }
             .container { display: block; width: 100%; max-width: 100%; margin: 0; padding: 0; }
             .main-column { display: block; }
             .main-content { box-shadow: none; padding: 0; border: none; }
-            
-            /* Tabellen-Layout strikt für den Druck reparieren (überschreibt mobile Ansicht) */
             table { border-collapse: collapse; width: 100%; margin-top: 15px; display: table !important; table-layout: fixed !important; }
             thead { display: table-header-group !important; }
             tbody { display: table-row-group !important; }
             tr { display: table-row !important; page-break-inside: avoid; border: none !important; box-shadow: none !important; margin: 0 !important; padding: 0 !important; }
             th, td { display: table-cell !important; border: 1px solid #000 !important; padding: 8px !important; text-align: left !important; font-size: 10pt !important; }
             th { background-color: #f0f0f0 !important; color: #000 !important; border-bottom: 2px solid #000 !important; }
-            
-            /* Mobile Label-Texte in der Tabelle ausblenden */
             td::before { display: none !important; content: '' !important; }
-            
-            /* Versteckte mobile Spalten (km, Kosten) für den Druck wieder einblenden */
             th:nth-child(5), th:nth-child(6), td:nth-child(5), td:nth-child(6) { display: table-cell !important; }
-            
-            /* Filter in den Spaltenköpfen ausblenden */
             th br, .col-filter { display: none !important; }
-            
-            /* Spaltenbreiten vernünftig verteilen */
-            th:nth-child(1) { width: 12% !important; } /* Datum */
-            th:nth-child(2) { width: 25% !important; } /* Start */
-            th:nth-child(3) { width: 25% !important; } /* Ziel */
-            th:nth-child(4) { width: 20% !important; } /* Notizen */
-            th:nth-child(5) { width: 8% !important; }  /* km */
-            th:nth-child(6) { width: 10% !important; } /* Kosten */
-            
-            /* Spezielle Anzeige nur für den Druck (Überschrift + Auswertung) */
+            th:nth-child(1) { width: 12% !important; } th:nth-child(2) { width: 25% !important; } th:nth-child(3) { width: 25% !important; }
+            th:nth-child(4) { width: 20% !important; } th:nth-child(5) { width: 8% !important; }  th:nth-child(6) { width: 10% !important; }
             #printSummary.hidden { display: block !important; margin-bottom: 20px; }
             #printSummary h2 { margin-top: 0; border-bottom: 2px solid #000; padding-bottom: 5px; font-size: 18pt; }
         }
@@ -233,14 +218,8 @@
 
     <div class="container" id="appContainer" style="display: none;">
         
-        <!-- LINKE SPALTE (Auf Desktop) -->
         <div class="main-column">
-            
-            <!-- FORMULAR BLOCK -->
-            <!-- Auf dem Smartphone rutscht dies auf Position 1 (Ganz oben) -->
             <div class="main-content" style="order: 1;">
-                
-                <!-- Wird NUR beim Drucken/PDF-Export sichtbar -->
                 <div id="printSummary" class="hidden">
                     <h2>Fahrtenbuch Auszug</h2>
                     <p style="font-size: 12pt;">Zeitraum: <strong id="printZeitraum"></strong></p>
@@ -292,8 +271,6 @@
                 </form>
             </div>
 
-            <!-- TABELLEN BLOCK -->
-            <!-- Auf dem Smartphone rutscht dies auf Position 3 (Ganz unten) -->
             <div class="main-content" style="order: 3;">
                 <div class="table-controls">
                     <div class="table-filter-group">
@@ -322,11 +299,8 @@
                     <tbody id="tabelleBody"></tbody>
                 </table>
             </div>
-
         </div>
 
-        <!-- RECHTE SPALTE (SIDEBAR) -->
-        <!-- Auf dem Smartphone rutscht dies auf Position 2 (Zwischen Formular und Tabelle) -->
         <div class="sidebar" style="order: 2;">
             <div class="box">
                 <h3>⚙️ Routing Engine</h3>
@@ -366,12 +340,12 @@
             </div>
 
             <div class="box">
-                <h3>💾 Backup (Export/Import)</h3>
+                <h3>💾 Cloud Backup <span id="backupIndicator" title="Ungesicherte Änderungen" style="display:none; font-size:12px;">🔴</span></h3>
                 <div class="form-group">
                     <label>Export-Passwort (optional neu):</label>
                     <input type="password" id="backupPasswort" placeholder="Für Datei-Verschlüsselung">
                 </div>
-                <button type="button" class="btn-export" onclick="exportDaten()">⬇️ Backup herunterladen</button>
+                <button type="button" class="btn-export" id="btnExport" onclick="exportDaten()">⬇️ Backup herunterladen</button>
                 <div class="file-input-wrapper">
                     <button type="button" class="btn-import">⬆️ Backup laden (Merge)</button>
                     <input type="file" id="importFile" accept=".txt,.json,.enc" onchange="importDaten(event)">
@@ -396,6 +370,38 @@
         let aktuellGefilterteFahrten = [];
         let inMemorySchluessel = null; 
         let editId = null;
+        let needsExternalBackup = false; // NEU: Trackt ob es ungesicherte Änderungen gibt
+
+        // --- BROWSER WARNUNG BEIM SCHLIESSEN (Desktop) ---
+        window.addEventListener('beforeunload', function (e) {
+            if (needsExternalBackup) {
+                e.preventDefault(); // Zwingend für moderne Browser
+                e.returnValue = ''; // Standard-Nachricht des Browsers anzeigen
+            }
+        });
+
+        // --- BACKUP STATUS UI UPDATE ---
+        function setBackupStatus(isDirty) {
+            needsExternalBackup = isDirty;
+            
+            const btn = document.getElementById('btnExport');
+            const indicator = document.getElementById('backupIndicator');
+            
+            if (isDirty) {
+                btn.classList.add('btn-needs-backup');
+                btn.innerHTML = "⬇️ Backup (Ungesichert!)";
+                indicator.style.display = 'inline';
+            } else {
+                btn.classList.remove('btn-needs-backup');
+                btn.innerHTML = "⬇️ Backup herunterladen";
+                indicator.style.display = 'none';
+            }
+            
+            // Status auch in Settings speichern, falls die App weggewischt wird
+            const s = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}');
+            s.needsExternalBackup = isDirty;
+            localStorage.setItem(SETTINGS_KEY, JSON.stringify(s));
+        }
 
         // --- BASIS KRYPTOGRAFIE ---
         function bufferToBase64(b) { return btoa(String.fromCharCode(...new Uint8Array(b))); }
@@ -476,6 +482,11 @@
             if(s.apiKey) document.getElementById('apiKey').value = s.apiKey;
             if(s.kmPreis) document.getElementById('kmPreis').value = s.kmPreis;
             
+            // Backup-Status laden
+            if(s.needsExternalBackup !== undefined) {
+                setBackupStatus(s.needsExternalBackup);
+            }
+            
             document.getElementById('filterVon').value = getErsterTagDesMonats();
             document.getElementById('filterBis').value = getLetzterTagDesMonats();
             
@@ -488,6 +499,9 @@
             const iv = crypto.getRandomValues(new Uint8Array(12));
             const enc = await crypto.subtle.encrypt({ name: "AES-GCM", iv: iv }, inMemorySchluessel, new TextEncoder().encode(JSON.stringify(fahrten)));
             localStorage.setItem(STORAGE_KEY, JSON.stringify({ iv: bufferToBase64(iv), data: bufferToBase64(enc) }));
+            
+            // Nach jeder Änderung (Speichern/Löschen) markieren wir die DB als "dirty" für Cloud-Backup
+            setBackupStatus(true);
         }
 
         function formatLocalDatum(d) { return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
@@ -559,7 +573,12 @@
 
         // --- TABELLE ---
         function aktualisiereAnsicht() {
-            localStorage.setItem(SETTINGS_KEY, JSON.stringify({ apiAuswahl: document.getElementById('apiAuswahl').value, apiKey: document.getElementById('apiKey').value, kmPreis: document.getElementById('kmPreis').value }));
+            const s = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}');
+            s.apiAuswahl = document.getElementById('apiAuswahl').value;
+            s.apiKey = document.getElementById('apiKey').value;
+            s.kmPreis = document.getElementById('kmPreis').value;
+            localStorage.setItem(SETTINGS_KEY, JSON.stringify(s));
+            
             const v = document.getElementById('filterVon').value, b = document.getElementById('filterBis').value, p = parseFloat(document.getElementById('kmPreis').value);
             const fD = document.getElementById('colFilterDatum').value.toLowerCase(), fS = document.getElementById('colFilterStart').value.toLowerCase(), fZ = document.getElementById('colFilterZiel').value.toLowerCase(), fN = document.getElementById('colFilterNotizen').value.toLowerCase();
 
@@ -839,6 +858,7 @@
                         title: 'Fahrtenbuch Backup'
                     });
                     showToast("Export erfolgreich geteilt!");
+                    setBackupStatus(false); // NEU: Backup erfolgreich! Markierung entfernen
                     return; 
                 } else {
                     showToast("Browser blockiert File-Share (Fallback aktiv)", true);
@@ -852,6 +872,7 @@
             a.download = dateiname; 
             a.click();
             showToast("Backup heruntergeladen.");
+            setBackupStatus(false); // NEU: Backup erfolgreich (als Download)
         }
 
         async function importDaten(ev) {
